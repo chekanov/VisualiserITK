@@ -13,7 +13,7 @@ Install ROOT 6.X and check that the variable $ROOTSYS is set.
 ## Get xercesc
 
 Define the directory $DIR where you want to install xercesc. Download it from
-[http://ftp-stud.hs-esslingen.de/pub/Mirrors/ftp.apache.org/dist//xerces/c/3/sources/xerces-c-3.1.4.tar.gz](here). 
+[here](http://ftp-stud.hs-esslingen.de/pub/Mirrors/ftp.apache.org/dist//xerces/c/3/sources/xerces-c-3.1.4.tar.gz). 
 Then compile and install it:
 
 
@@ -67,7 +67,7 @@ PixelStave.xml
 
 In fact, they are just the symbolic links to the corresponding ATLAS layout files. Simply run "source ./README" inside
 the the "xml/layout" directory  to point to the necessary layout files. For ATLAS, you will need to download these XML files and make the corresponding symbolic links.
-Typically, the XML files can be downloaded from the "share" directory of the [https://svnweb.cern.ch/trac/atlasoff/browser/InnerDetector/InDetDetDescr/InDetTrackingGeometryXML/trunk/share?order=name](InDetTrackingGeometryXML package).
+Typically, the XML files can be downloaded from the "share" directory of the [InDetTrackingGeometryXML package](https://svnweb.cern.ch/trac/atlasoff/browser/InnerDetector/InDetDetDescr/InDetTrackingGeometryXML/trunk/share?order=name](InDetTrackingGeometryXML package).
  
 # More explanation on codding
 
