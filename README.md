@@ -52,7 +52,7 @@ This creates the executable "main". Run it and you will see the EVE display with
 In addition, the program creates several output files (ROOT, JSON, GDML) for further exploration of the layout.
 
 
-# How o modify the input layout
+# How to modify the input layout
 
 This program reads the XML files from the directory "xml". The XML files are orginized in the subdirectoris. You can change 
 the layout directory on the line "XMLReaderSvc reader("ATLAS-P2-ITK-16-00-00")" inside "main.cxx" and recompile it. 
@@ -67,7 +67,7 @@ PixelStave.xml
 
 In fact, they are just the symbolic links to the corresponding ATLAS layout files. Simply run "source ./README" inside
 the the "xml/layout" directory  to point to the necessary layout files. For ATLAS, you will need to download these XML files and make the corresponding symbolic links.
-Typically, the XML files can be downloaded from the "share" directory of the [InDetTrackingGeometryXML package](https://svnweb.cern.ch/trac/atlasoff/browser/InnerDetector/InDetDetDescr/InDetTrackingGeometryXML/trunk/share?order=name](InDetTrackingGeometryXML package).
+Typically, the XML files can be downloaded from the "share" directory of the [InDetTrackingGeometryXML package](https://svnweb.cern.ch/trac/atlasoff/browser/InnerDetector/InDetDetDescr/InDetTrackingGeometryXML/trunk/share?order=name) (available for ATLAS members only).
  
 # More explanation on codding
 
