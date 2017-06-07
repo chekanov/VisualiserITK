@@ -21,7 +21,7 @@ InDet::XMLReaderSvc::XMLReaderSvc(const std::string& name) {
   m_xml_materials = dir+"Materials.xml";
   m_xml_pixmodules = dir+"PixelModules.xml";
   m_xml_pixBarrelLayers=dir+"PixelBarrel.xml";
-//  m_xml_pixEndcapLayers=dir+"ITK_PixelModules.xml";
+  m_xml_pixEndcapLayers=dir+"PixelEndcap.xml";
 
   cout << "  -> " << m_xml_materials << endl;
   cout << "  -> " <<  m_xml_pixStaves<< endl;
@@ -790,6 +790,36 @@ std::vector< BarrelLayerTmp *> InDet::XMLReaderSvc::getPixelBarrelLayers() const
 }
 
 
+std::vector< EndcapLayerTmp *> InDet::XMLReaderSvc::getPixelEndcapLayers() const
+{
+
+  std::vector< EndcapLayerTmp *> layers;
+  // Get staves from template list
+    unsigned int n = m_tmp_pixBarrelLayer.size();
+     for(unsigned int is=0;is<n;is++){
+          EndcapLayerTmp *layer = m_tmp_sctEndcapLayer.at(is);
+              layers.push_back(layer);
+     }
+      return layers;
+  }
+
+
+/*std::vector<InDet::DiscTmp*> InDet::XMLReaderSvc::getPixelEncapDiscTemplate(unsigned int ilayer) const
+{
+
+  std::vector<InDet::DiscTmp*> Discs;
+
+  // Get staves from template list
+   unsigned int n = Stave.size();
+      for(unsigned int istave=0;istave<n;istave++){
+         StaveTmp *stave = m_tmp_pixStave.at(istave);
+             if(stave->layer == int(ilayer)) staves.push_back(stave);
+               }
+ 
+                   if(staves.size()==0) cout << "InDet no Pixel Stave template found for layer " << ilayer << endl;
+  
+                     return staves;
+                    }*/
 
 
 InDet::BarrelLayerTmp* InDet::XMLReaderSvc::getPixelBarrelLayerTemplate(unsigned int ilayer) const

@@ -66,6 +66,7 @@ namespace InDet {
     ModuleTmp* getModuleTemplate(const std::string s) const;
     ChipTmp* getChipTemplate(const std::string s) const;
     std::vector< BarrelLayerTmp *> getPixelBarrelLayers() const;
+    std::vector< EndcapLayerTmp *> getPixelEndcapLayers() const;
 
      // Stave building helpers
     double getHalfPlainLength(InDet::StaveTmp *staveTmp) const;
