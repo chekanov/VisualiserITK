@@ -1,5 +1,8 @@
+/* Visualization of Barrel Pixel  
+*
+* @author S.Chekanov (ANL) 
+*/
 #include "ShowPixelBarrel.h"
-
 
 bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeoManager* geom)
 {
@@ -38,18 +41,20 @@ bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
      // look at staves
      std::vector<StaveTmp*> staves=reader.getPixelStaveTemplate(layer->index);
      int n_staves=layer->stave_n;
-
      cout << "       \n\n --> Nr of staves for this layer = " << n_staves <<  " (or vector size) = "  << staves.size()<< endl;
 
 
     double  sector_phi =  (2*TMath::Pi() / n_staves);
 
      float layer_halfplainlength=0;
-     // for(unsigned int istave=0; istave<staves.size(); istave++){
-      for(unsigned int ist=0; ist<n_staves; ist++){
+
+     // loop over all staves..
+     for(int ist=0; ist<n_staves; ist++){
 
       int istave=0;
       StaveTmp *stave =  staves.at(istave);
+      string stave_type=stave->type;
+
       //  compute the stave length and steps for *tracking*
       double halfplainlength = reader.getHalfPlainLength(stave);
       double zstep = reader.getZStep(stave);
@@ -65,11 +70,11 @@ bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
  
 
 
-      string stavename="StaveAssembly"; // std::to_string(ist+1);
+      string stavename="Stave ("+stave_type+")"; // std::to_string(ist+1);
       TGeoVolume *assembly_stave = new TGeoVolumeAssembly(stavename.c_str());
 
 
-      stavename="StaveSupport"; // +std::to_string(istave+1);
+      stavename="Support ("+stave_type+")"; // +std::to_string(istave+1);
       TGeoVolume *stave_obj = geom->MakeBox(stavename.c_str(), Al, stave_thickness, 0.5*stave_width, halfplainlength);
       stave_obj->SetLineColor(kRed);
       stave_obj->SetTransparency(70);  //root.cern.ch/doc/v608/classTGeoTranslation.html ;
@@ -85,6 +90,9 @@ bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
       double module_width  = plainModule->widthmax;
       double module_thickness  = plainModule->thickness;
       double moduleplain_gap = stave->b_gap;
+      string module_name= plainModule->name;
+      string module_chip =plainModule->chip_type;
+      cout << " -> Module name=" << module_name << " Chip=" << module_chip << " length=" << module_length << " mm  width=" << module_width << " mm" << endl;
 
 
 // add modules
@@ -93,8 +101,7 @@ bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
       int NMOD = nmodtrans + nmodplain;
       // add modules 
       for (int imod=0; imod<NMOD; imod++) {
-        string modulename="module"; //  + std::to_string(imod+1);
-        TGeoVolume * module_obj =  geom->MakeBox(modulename.c_str(),Si,module_thickness,0.5*module_width,0.5*module_length);
+        TGeoVolume * module_obj =  geom->MakeBox(module_name.c_str(),Si,module_thickness,0.5*module_width,0.5*module_length);
         module_obj->SetLineColor(80);
         module_obj->SetFillColor(80);
         module_obj->SetTransparency(70);
