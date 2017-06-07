@@ -18,15 +18,15 @@ bool ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
    TGeoMedium *Al = new TGeoMedium("Aluminium",2, matAl);
    TGeoMedium *Si = new TGeoMedium("Si",7,7,0,0,0,20,0.1000000E+11,0.212,0.1000000E-02,1.150551);
 
-
+//Build Layers for discs
 	std::vector< EndcapLayerTmp *> layers = reader.getPixelEndcapLayers();
 
 	for(unsigned int i=0; i<layers.size();i++) {
 		EndcapLayerTmp *layer = layers.at(i);
      		string layername="LayerAssembly"; // +string(layer->name);
       		TGeoVolume *assembly_layer = new TGeoVolumeAssembly(layername.c_str());
-    		//double splitDistance = layer->splitOffset;
-
+    		//double spreadDistance = (layer->splitOffset)/2;
+		
 
 		layer->Print();	
 //Build rings  in layer
@@ -60,6 +60,5 @@ bool ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
 
    return true;
 } 
-
 
 

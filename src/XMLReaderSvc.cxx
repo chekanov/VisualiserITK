@@ -56,11 +56,9 @@ bool InDet::XMLReaderSvc::initialize()
   parseFile(m_xml_pixStaves.c_str(),"PixelStaves","PixelStave");
   ATH_MSG_INFO("Reading Pixel Barrel Layer templates");
   parseFile(m_xml_pixBarrelLayers.c_str(),"PixelBarrelLayers","PixelBarrelLayer");
-/*
   ATH_MSG_INFO("Reading Pixel Endcap Layer templates");
   parseFile(m_xml_pixEndcapLayers.c_str(),"PixelEndcapLayers","PixelEndcapRing");
   parseFile(m_xml_pixEndcapLayers.c_str(),"PixelEndcapLayers","PixelEndcapDisc");
-*/
 
 
 
@@ -109,8 +107,8 @@ void InDet::XMLReaderSvc::parseNode(std::string section, DOMNode *node)
    else if(section.find("PixelEndcapDisc" ) != std::string::npos) parseEndcapXML(node,m_tmp_pixEndcapLayer);
 //  else if(section.find("SCTStave")         != std::string::npos) parseStaveXML(node,m_tmp_sctStave);
 //  else if(section.find("SCTBarrelLayer")   != std::string::npos) parseBarrelLayerXML(node,m_tmp_sctBarrelLayer);
-//  else if(section.find("SCTEndcapRing")    != std::string::npos) parseEndcapXML(node,m_tmp_sctEndcapLayer);
-//  else if(section.find("SCTEndcapDisc")    != std::string::npos) parseEndcapXML(node,m_tmp_sctEndcapLayer);
+//   else if(section.find("SCTEndcapRing")    != std::string::npos) parseEndcapXML(node,m_tmp_sctEndcapLayer);
+//   else if(section.find("SCTEndcapDisc")    != std::string::npos) parseEndcapXML(node,m_tmp_sctEndcapLayer);
     return;
 }
 

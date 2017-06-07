@@ -187,7 +187,7 @@ TGeoMedium *Ts = new TGeoMedium("Ts",12,12,0,0,0,20,0.1000000E+11,0.212,0.100000
    // gGeoManager->Export("out/itkgeom.root");
    gGeoManager->SaveAs("out/itkgeom.png");
    gGeoManager->Export("out/itkgeom.gdml");
-   // gGeoManager->SaveAs("out/itkgeom.gdml");
+
 
   theApp.Run();
   return 0;
