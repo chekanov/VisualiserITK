@@ -143,7 +143,7 @@ TGeoMedium *Ts = new TGeoMedium("Ts",12,12,0,0,0,20,0.1000000E+11,0.212,0.100000
  
 
    // beam pipe
-   TGeoVolume *BEAMPIPE = geom->MakeTube("BeamPipe", Be , 32, 32, 1000);
+   TGeoVolume *BEAMPIPE = geom->MakeTube("BeamPipe", Be , 32, 32, 3500);
    BEAMPIPE->SetLineColor(43);
    BEAMPIPE->SetTransparency(50);
    top->AddNode(BEAMPIPE, 0, new TGeoTranslation(0,0,0));
