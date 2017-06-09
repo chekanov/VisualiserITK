@@ -7,6 +7,6 @@ ln -s $DIR/InclBrl4Ref_InclinedQuads_PixelStave.xml PixelStave.xml
 ln -s $DIR/Materials.xml Materials.xml
 ln -s $DIR/ITK_PixelModules.xml PixelModules.xml
 ln -s $DIR/ExtBrl4Ref25x100_PixelBarrel.xml  PixelBarrel.xml
-ln -s $DIR/ECRing4Ref_InclinedAlternative_PixelEndcap.xml  PixelEndcap.xml
+ln -s $DIR/ECRing4Ref_InclinedAlternative_PixelEndcap.xml PixelEndcap.xml
 
  

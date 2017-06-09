@@ -28,6 +28,7 @@
   <LayerRadius> 160.0 </LayerRadius>
   <StaveTilt> 0.0 </StaveTilt>
   <StaveZOffset>  6.0 </StaveZOffset>
+  <LayerPhiOfModuleZero> 0.10821 </LayerPhiOfModuleZero>
 </PixelBarrelLayer>     
       
 <PixelBarrelLayer>      
@@ -38,6 +39,7 @@
   <LayerRadius> 220.0 </LayerRadius>
   <StaveTilt> 0.0 </StaveTilt>
   <StaveZOffset>  6.0 </StaveZOffset>
+  <LayerPhiOfModuleZero> 0.08045968 </LayerPhiOfModuleZero>
 </PixelBarrelLayer>     
       
 <PixelBarrelLayer>      
@@ -48,6 +50,7 @@
   <LayerRadius> 279.0 </LayerRadius>
   <StaveTilt> 0.0 </StaveTilt>
   <StaveZOffset>  6.0 </StaveZOffset>
+  <LayerPhiOfModuleZero> 0.06544985 </LayerPhiOfModuleZero>
 </PixelBarrelLayer>     
       
 </PixelBarrelLayers>      
