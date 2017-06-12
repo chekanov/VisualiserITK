@@ -23,7 +23,8 @@ bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
    TGeoMedium *Al = new TGeoMedium("Aluminium",2, matAl);
    TGeoMedium *Si = new TGeoMedium("Si",7,7,0,0,0,20,0.1000000E+11,0.212,0.1000000E-02,1.150551);
 
-
+   string pixelBarrelName = "PixelBarrel";
+   TGeoVolume *pixel_barrel = new TGeoVolumeAssembly(pixelBarrelName.c_str());
 
     // look at layers and build them
     std::vector< BarrelLayerTmp *> layers = reader.getPixelBarrelLayers();
@@ -141,13 +142,11 @@ bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
       fullname="Layer"; //  + std::to_string(i);
       assembly_layer->AddNode(LAYER, i+1, new TGeoTranslation(0,0,0));
 
-      top->AddNode(assembly_layer, i+1, new TGeoTranslation(0,0,0));
-
-
-
+      pixel_barrel->AddNode(assembly_layer, i+1, new TGeoTranslation(0,0,0));
+      
     }
 
-
+   top->AddNode(pixel_barrel,1,new TGeoTranslation(0,0,0));
 
 
    return true;

@@ -18,6 +18,10 @@ bool ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
    TGeoMedium *Al = new TGeoMedium("Aluminium",2, matAl);
    TGeoMedium *Si = new TGeoMedium("Si",7,7,0,0,0,20,0.1000000E+11,0.212,0.1000000E-02,1.150551);
 
+	string pixelendcapsname = "PixelEndcaps";
+	TGeoVolume *pixel_endcaps = new TGeoVolumeAssembly(pixelendcapsname.c_str());
+
+
 //Build Layers for discs
 	std::vector< EndcapLayerTmp *> layers = reader.getPixelEndcapLayers();
 
@@ -109,8 +113,9 @@ bool ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
 			assembly_layer->AddNode(assembly_rings,iR+1,new TGeoTranslation(0,0,0));
 			
 		}
-	
-			top->AddNode(assembly_layer, i+1, new TGeoTranslation(0,0,0));
+
+		pixel_endcaps->AddNode(assembly_layer, i+1, new TGeoTranslation(0,0,0));
+			
 	}
 
 	TGeoVolume *pixel_cover = geom->MakeTube("PixelDetectorShell",Al,0,layers.at(layers.size()-1)->outerRadius[0]+10,3000+10);
@@ -119,11 +124,9 @@ bool ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
 	pixel_cover->SetTransparency(70);
 
 	top->AddNode(pixel_cover,1,new TGeoTranslation(0,0,0));
+	top->AddNode(pixel_endcaps,1,new TGeoTranslation(0,0,0));
+ 
 	
-	
-
-
-
 
    return true;
 } 
