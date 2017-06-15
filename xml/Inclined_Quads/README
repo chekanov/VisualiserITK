@@ -1,0 +1,22 @@
+# Run2 beam pipe
+# Implementation of Inclined_Quads
+# See: https://twiki.cern.ch/twiki/bin/view/AtlasProtected/AtlasProductionGroupMC15Upgrade
+# Source this file to create soft links
+
+rm -f *.xml
+
+# https://svnweb.cern.ch/trac/atlasoff/browser//InnerDetector/InDetTrackingGeometryXML/trunk/share
+DIR="../ATLAS/share"
+ln -s $DIR/InclBrl4Ref_InclinedQuads_PixelStave.xml PixelStave.xml
+ln -s $DIR/Materials.xml Materials.xml
+ln -s $DIR/ITK_PixelModules.xml PixelModules.xml
+ln -s $DIR/InclBrl4Ref_InclinedQuads_PixelBarrel.xml  PixelBarrel.xml
+ln -s $DIR/ECRing4Ref_InclinedQuads_PixelEndcap.xml PixelEndcap.xml
+
+# https://svnweb.cern.ch/trac/atlasoff/browser/InnerDetector/InDetDetDescr/PixelLayouts/BarrelInclinedRef/trunk
+# for PST and IST:
+DIR="../ATLAS/data"
+ln -s $DIR/InclBrl_PixelSimpleService.xml PixelSimpleService.xml
+ 
+ 
+ 

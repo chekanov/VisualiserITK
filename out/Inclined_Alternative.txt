@@ -1,0 +1,15 @@
+ ==== 3D model for  Inclined_Alternative ====
+ 
+used xml files from:
+https://svnweb.cern.ch/trac/atlasoff/browser//InnerDetector/InDetTrackingGeometryXML/trunk/share/
+https://svnweb.cern.ch/trac/atlasoff/browser/InnerDetector/InDetDetDescr/PixelLayouts/BarrelInclinedRef/trunk/data/
+
+The 3D model is constructed from the following files in Inclined_Alternative:
+./xml/Inclined_Alternative/Materials.xml -> ../ATLAS/share/Materials.xml
+./xml/Inclined_Alternative/PixelBarrel.xml -> ../ATLAS/share/InclBrl4Ref_InclinedAlternative_PixelBarrel.xml
+./xml/Inclined_Alternative/PixelEndcap.xml -> ../ATLAS/share/ECRing4Ref_InclinedAlternative_PixelEndcap.xml
+./xml/Inclined_Alternative/PixelModules.xml -> ../ATLAS/share/ITK_PixelModules.xml
+./xml/Inclined_Alternative/PixelSimpleService.xml -> ../ATLAS/data/InclBrl_PixelSimpleService.xml
+./xml/Inclined_Alternative/PixelStave.xml -> ../ATLAS/share/InclBrl4Ref_InclinedAlternative_PixelStave.xml
+
+Thu Jun 15 14:10:24 UTC 2017

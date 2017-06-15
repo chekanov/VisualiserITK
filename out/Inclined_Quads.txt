@@ -1,0 +1,15 @@
+ ==== 3D model for  Inclined_Quads ====
+ 
+used xml files from:
+https://svnweb.cern.ch/trac/atlasoff/browser//InnerDetector/InDetTrackingGeometryXML/trunk/share/
+https://svnweb.cern.ch/trac/atlasoff/browser/InnerDetector/InDetDetDescr/PixelLayouts/BarrelInclinedRef/trunk/data/
+
+The 3D model is constructed from the following files in Inclined_Quads:
+./xml/Inclined_Quads/Materials.xml -> ../ATLAS/share/Materials.xml
+./xml/Inclined_Quads/PixelBarrel.xml -> ../ATLAS/share/InclBrl4Ref_InclinedQuads_PixelBarrel.xml
+./xml/Inclined_Quads/PixelEndcap.xml -> ../ATLAS/share/ECRing4Ref_InclinedQuads_PixelEndcap.xml
+./xml/Inclined_Quads/PixelModules.xml -> ../ATLAS/share/ITK_PixelModules.xml
+./xml/Inclined_Quads/PixelSimpleService.xml -> ../ATLAS/data/InclBrl_PixelSimpleService.xml
+./xml/Inclined_Quads/PixelStave.xml -> ../ATLAS/share/InclBrl4Ref_InclinedQuads_PixelStave.xml
+
+Thu Jun 15 14:10:14 UTC 2017
