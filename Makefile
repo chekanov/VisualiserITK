@@ -26,7 +26,7 @@ LIBS         +=-L$(XercesC_HOME)/lib -lxerces-c
  
 # LIBS         += -L./ApplyJetCalibration/StandAlone   -lApplyJetCalibration
 
-SOURCE_FILES := $(shell ls -1 *.cxx)
+SOURCE_FILES := $(shell ls -1 itkvis.cxx)
 SOURCE_FILES += $(shell ls -1 src/*.cxx)
 
 INCLUDE1= -I./inc
@@ -41,17 +41,17 @@ objects       = $(patsubst %.cxx,%.o,$(SOURCE_FILES))
 %.o: %.cxx
 	$(CXX) $(OPT) $(CXXFLAGS) $(INCLUDE1) $(INCLUDE2) $(INCLUDE3) -o $@ -c $<
 
-Tasks:     main
+Tasks:    itkvis
 
 
 tar:
 	rm -f ana.tgz; cd ../; tar -cvzf ana.tgz --exclude='*.o' --exclude='*.root' \
 	--exclude='*.log'  --exclude='*.tup' --exclude='*.eps' --exclude='*.png' --exclude='*.log.gz'\
-	--exclude='main' --exclude='*.root.log.gz' --exclude='*.so' --exclude='*~' --exclude='*.pyc' ana; \
+	--exclude='itkvis' --exclude='*.root.log.gz' --exclude='*.so' --exclude='*~' --exclude='*.pyc' ana; \
         mv ana.tgz ana/; cd ana; 
 
 
-main: $(objects)
+itkvis: $(objects)
 	$(LD) $(LDFLAGS) $^ $(LIBS) $(OutPutOpt)$@
 clean:
-	        @rm -f *.o  main *~ src/*.o src/*~ inc/*~; echo "Clear.." 
+	        @rm -f *.o  itkvis *~ src/*.o src/*~ inc/*~; echo "Clear.." 
