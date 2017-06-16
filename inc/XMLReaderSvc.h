@@ -67,6 +67,7 @@ namespace InDet {
     ChipTmp* getChipTemplate(const std::string s) const;
     std::vector< BarrelLayerTmp *> getPixelBarrelLayers() const;
     std::vector< EndcapLayerTmp *> getPixelEndcapLayers() const;
+    std::vector<SimpleServiceTubeTmp *> getPixelSimpleServiceTubeTemplates()const;
 
      // Stave building helpers
     double getHalfPlainLength(InDet::StaveTmp *staveTmp) const;
@@ -86,7 +87,7 @@ namespace InDet {
     void parseStaveXML(DOMNode* node, std::vector< StaveTmp *>& vtmp);
     void parseBarrelLayerXML(DOMNode* node, std::vector< BarrelLayerTmp *>& vtmp);
     void parseEndcapXML(DOMNode* node, std::vector< EndcapLayerTmp *>& vtmp);
-
+    void parseSimpleServiceXML(DOMNode* node);
      void computeModuleSize(ModuleTmp *module);
 
     // Data members
@@ -100,6 +101,8 @@ namespace InDet {
     std::string m_xml_sctStaves;
     std::string m_xml_sctBarrelLayers;
     std::string m_xml_sctEndcapLayers;
+    std::string m_xml_SimpleServices;
+    std::string m_layoutname;
 
     std::vector< MaterialTmp *>    m_tmp_material;
     std::vector< ComponentTmp *>   m_tmp_component;
@@ -111,7 +114,7 @@ namespace InDet {
     std::vector< StaveTmp *>       m_tmp_sctStave;
     std::vector< BarrelLayerTmp *> m_tmp_sctBarrelLayer;
     std::vector< EndcapLayerTmp *> m_tmp_sctEndcapLayer;
-
+    std::vector< SimpleServiceTubeTmp *> m_tmp_SimpleService;
     bool m_doPix, m_doSCT, m_isGMX, m_createDict, m_readXMLfromDB;
   };
 }

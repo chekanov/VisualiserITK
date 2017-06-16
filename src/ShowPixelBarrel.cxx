@@ -25,6 +25,9 @@ bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
 
    string pixelBarrelName = "PixelBarrel";
    TGeoVolume *pixel_barrel = new TGeoVolumeAssembly(pixelBarrelName.c_str());
+   
+   string pixelBarrelRingsName = "PixelBarrelRings";
+   TGeoVolume *pixelBarrelRings_Assembly = new TGeoVolumeAssembly(pixelBarrelRingsName.c_str());
 
     // look at layers and build them
     std::vector< BarrelLayerTmp *> layers = reader.getPixelBarrelLayers();
@@ -33,6 +36,10 @@ bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
       string layername="LayerAssembly"; // +string(layer->name);
       TGeoVolume *assembly_layer = new TGeoVolumeAssembly(layername.c_str());
       double layer_radius=layer->radius;
+	
+      string ringLayerName="RingLayerAssembly"; // +string(layer->name);
+      TGeoVolume *ringLayer_Assembly = new TGeoVolumeAssembly(ringLayerName.c_str());
+
 
 
       cout << "\n\n -->  INFO for layer = " << layer->index << endl;
@@ -69,14 +76,16 @@ bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
       // cout << "######## Module width=" << module_width << endl;
       double stave_thickness=2; // which is correct number ?? 
  
-
+     
 
       string stavename="Stave ("+stave_type+")"; // std::to_string(ist+1);
       TGeoVolume *assembly_stave = new TGeoVolumeAssembly(stavename.c_str());
-
+	
+      string barrelringname="Barrel Rings";
+      TGeoVolume *assembly_barrelring = new TGeoVolumeAssembly(barrelringname.c_str());
 
       stavename="Support ("+stave_type+")"; // +std::to_string(istave+1);
-      TGeoVolume *stave_obj = geom->MakeBox(stavename.c_str(), Al, stave_thickness, 0.5*stave_width, halfplainlength);
+      TGeoVolume *stave_obj = geom->MakeBox(stavename.c_str(), Al, stave_thickness, 0.5*stave_width, stave->support_halflength);
       stave_obj->SetLineColor(kRed);
       stave_obj->SetTransparency(70);  //root.cern.ch/doc/v608/classTGeoTranslation.html ;
      // rotate stave
@@ -84,8 +93,48 @@ bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
       TGeoRotation * rot = new TGeoRotation(); 
       rot->SetAngles(0, 0, 0); 
       assembly_stave->AddNode(stave_obj,ist+1 , new TGeoCombiTrans(0,0,0,rot));
+    
+     //stave "mountain" modules aka. barrel ring modules
+     if(stave_type.compare("Alpine")==0){
+	cout<<"about to read alpine module templates stavetype: "<<stave_type<<endl;
+     InDet::ModuleTmp* ringModule = reader.getModuleTemplate(stave->alp_type);
+     std::vector<double> rmodule_pos = stave->alp_pos;		
+     double rmodule_length = ringModule->length;
+     double rmodule_width  = ringModule->widthmax;
+     double rmodule_thickness  = ringModule->thickness;
+     string rmodule_name= ringModule->name;
+     string rmodule_chip =ringModule->chip_type;
+     double rmodule_angle = stave->alp_angle;
+     double rmodule_rshift = stave->alp_rshift;
+     cout << " ->Ring Module name=" << rmodule_name << " Chip=" << rmodule_chip << " length=" << rmodule_length << " mm  width=" << rmodule_width << " mm" << endl;
+     
+     //add Barrel ring modules
+     for(int irmod=0;irmod<rmodule_pos.size();irmod++){
+	TGeoVolume * rmodule_obj =  geom->MakeBox(rmodule_name.c_str(),Si,rmodule_thickness,0.5*rmodule_length,0.5*rmodule_width);
+        rmodule_obj->SetLineColor(80);
+        rmodule_obj->SetFillColor(80);
+        rmodule_obj->SetTransparency(70);
+	
+	TGeoRotation *ringRot = new TGeoRotation;
+	ringRot->RotateY(-rmodule_angle*degree);
+	TGeoRotation *ringRotFlipped = new TGeoRotation;
+        ringRotFlipped->RotateY(rmodule_angle*degree);
 
-     // show one pixel module 
+
+	assembly_barrelring->AddNode(rmodule_obj,irmod+1,new TGeoCombiTrans(0,0,rmodule_pos[irmod],ringRot));
+	assembly_barrelring->AddNode(rmodule_obj,irmod+1,new TGeoCombiTrans(0,0,-rmodule_pos[irmod],ringRotFlipped));
+	
+	float  ringxpos=(layer_radius-stave_thickness+rmodule_rshift)*TMath::Cos(sector_phi*ist);
+        float ringypos=(layer_radius-stave_thickness+rmodule_rshift)*TMath::Sin(sector_phi*ist);
+
+	TGeoRotation *rotBarrelRings=new TGeoRotation;
+        rotBarrelRings->SetAngles(sector_phi*ist*degree,0,0);
+	
+	ringLayer_Assembly->AddNode(assembly_barrelring,ist+1, new TGeoCombiTrans(ringxpos,ringypos,0,rotBarrelRings));
+	}
+     }
+
+     // show one pixel module
       InDet::ModuleTmp* plainModule = reader.getModuleTemplate(stave->b_type);
       double module_length = plainModule->length;
       double module_width  = plainModule->widthmax;
@@ -115,23 +164,34 @@ bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
          assembly_stave->AddNode(module_obj, imod+stave_thickness, new TGeoCombiTrans(1,0,zpos,rot));
 
       } // end loop over modules 
-
+    
 
 
       float xpos=(layer_radius-stave_thickness)*TMath::Cos(sector_phi*ist);
-      float ypos=(layer_radius-stave_thickness)*TMath::Sin(sector_phi*ist);      
+      float ypos=(layer_radius-stave_thickness)*TMath::Sin(sector_phi*ist);
+      
+
       TGeoRotation * rotstave = new TGeoRotation();
 
       float rotation_degree=stave_ang+ sector_phi*ist*degree;
       rotstave->SetAngles(rotation_degree, 0, 0); // all angles in degrees
-
+                
       assembly_layer->AddNode(assembly_stave,ist+1, new TGeoCombiTrans(xpos,ypos,0,rotstave));
-       
+  
       stave->Print();
      }; // end loop over staves 
 
-
-
+ 	/*//support rings for barrel
+ 	string supportRingName = "BarrelSupportRing";
+	TGeoVolume *supportRing_obj =geom->MakeTube(supportRingName.c_str(),Al,layer_radius-10,layer_radius+10,10);
+	//placehold untill support ring thickness can be determined
+	supportRing_obj->SetLineColor(kRed);
+	supportRing_obj->SetTransparency(65);
+	
+	pixel_barrel->AddNode(supportRing_obj,1,new TGeoTranslation(0,0,layer_halfplainlength+10));
+	//1.5offset is a placeholder till xml files can be deterimned
+	pixel_barrel->AddNode(supportRing_obj,2,new TGeoTranslation(0,0,-layer_halfplainlength-10));	
+	*/
    
      cout << "Layer Nr " << layer->index << " HalfPlainLength=" << layer_halfplainlength << endl;
 //      Rmin, Rmax, and a half-length dZ=1cm :
@@ -142,12 +202,13 @@ bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
       fullname="Layer"; //  + std::to_string(i);
       assembly_layer->AddNode(LAYER, i+1, new TGeoTranslation(0,0,0));
 
-      pixel_barrel->AddNode(assembly_layer, i+1, new TGeoTranslation(0,0,0));
       
+      pixel_barrel->AddNode(assembly_layer, i+1, new TGeoTranslation(0,0,0));
+      pixelBarrelRings_Assembly->AddNode(ringLayer_Assembly,i+1,new TGeoTranslation(0,0,0));       
     }
 
    top->AddNode(pixel_barrel,1,new TGeoTranslation(0,0,0));
-
+   top->AddNode(pixelBarrelRings_Assembly,1,new TGeoTranslation(0,0,0));
 
    return true;
 } 

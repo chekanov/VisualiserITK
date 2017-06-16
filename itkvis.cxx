@@ -36,7 +36,7 @@
 
 #include <ShowPixelBarrel.h>
 #include <ShowPixelEndcap.h>
-
+#include <ShowPixelSimpleService.h>
 
 using namespace std;
 using namespace xercesc;
@@ -158,6 +158,10 @@ TGeoMedium *Ts = new TGeoMedium("Ts",12,12,0,0,0,20,0.1000000E+11,0.212,0.100000
    ShowPixelEndcap *pixelEndcap = new ShowPixelEndcap();
    pixelEndcap->process(reader,top, geom);
  
+    //display pixel simple services 
+    ShowPixelSimpleService *pixelSimpleService = new ShowPixelSimpleService();
+    pixelSimpleService->process(reader,top, geom);
+    
 
    // beam pipe
    TGeoVolume *BEAMPIPE = geom->MakeTube("BeamPipe", Be , 32, 32, 3500);

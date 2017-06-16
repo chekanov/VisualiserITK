@@ -1,4 +1,5 @@
 #include "ShowPixelEndcap.h"
+#include <cmath>
 
 // implementation of the endcap drawing
 bool ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeoManager* geom)
@@ -96,12 +97,14 @@ bool ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
 				TGeoVolume *sect_obj = geom->MakeTubs(modType.c_str(),Al,innerradius,outerradius,totalRingThickness-layer->zoffset[0],(-1*PI*degree)/2+iS*angleSector,(-1*PI*degree)/2+iS*angleSector+angleSector);
 				sect_obj->SetLineColor(4);
 				sect_obj->SetTransparency(60);
-				/*if(layer->double_sided)	//needs to be tested with an xml file that has double sided endcaps
-					sect_obj =sect_obj->Divide(modType,3,2,1,1);*/
+				//if(layer->double_sided)	//needs to be tested with an xml file that has double sided endcaps
+					//sect_obj =sect_obj->Divide(modType,3,2,1,1);
 				ring_obj->AddNode(sect_obj,iS+1,new TGeoTranslation(0,0,layer->zoffset[0]));
 				ring_obj->AddNode(sect_obj,iS+1,new TGeoTranslation(0,0,-layer->zoffset[0]));
 			}
-
+			
+			
+			
 
 			//------adds rings to assemblies
 			assembly_rings->AddNode(ring_obj,iR+1,new TGeoCombiTrans(0,0,ringposition,0));
@@ -118,12 +121,12 @@ bool ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
 			
 	}
 
-	TGeoVolume *pixel_cover = geom->MakeTube("PixelDetectorShell",Al,0,layers.at(layers.size()-1)->outerRadius[0]+10,3000+10);
+	//TGeoVolume *pixel_cover = geom->MakeTube("PixelDetectorShell",Al,0,layers.at(layers.size()-1)->outerRadius[0]+10,3000+10);
 	//values of 10 mm added as placeholder till shell geometry is determined
-	pixel_cover->SetLineColor(kYellow);
-	pixel_cover->SetTransparency(70);
+	//pixel_cover->SetLineColor(kYellow);
+	//pixel_cover->SetTransparency(70);
 
-	top->AddNode(pixel_cover,1,new TGeoTranslation(0,0,0));
+//	top->AddNode(pixel_cover,1,new TGeoTranslation(0,0,0));
 	top->AddNode(pixel_endcaps,1,new TGeoTranslation(0,0,0));
  
 	

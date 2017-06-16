@@ -225,6 +225,27 @@ namespace InDet {
    
   };
 
+//SimpleService Template
+ class SimpleServiceTubeTmp {
+  public:
+    SimpleServiceTubeTmp() {  Rmin=0; Rmax = 0; Zmin = 0;Zmax=0; }
+    ~SimpleServiceTubeTmp() {}
+
+    inline void Print() {
+     std::cout<<"Simple Service name "<<Name<<std::endl;
+    }
+
+    std::string Name;
+    double Rmin;
+    double Rmax;
+    double Zmax;
+    double Zmin;	
+  };
+
+  
+                                                                                                                                                                                        
+
+
 }
 
 #endif // INDETTRACKINGGEOMETRY_XMLGEOTEMPLATES_H

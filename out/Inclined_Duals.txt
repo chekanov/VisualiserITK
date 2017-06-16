@@ -12,4 +12,4 @@ The 3D model is constructed from the following files in Inclined_Duals:
 ./xml/Inclined_Duals/PixelSimpleService.xml -> ../ATLAS/data/InclBrl_PixelSimpleService.xml
 ./xml/Inclined_Duals/PixelStave.xml -> ../ATLAS/share/InclBrl4Ref_InclinedDuals_PixelStave.xml
 
-Thu Jun 15 14:10:19 UTC 2017
+Fri Jun 16 18:14:33 UTC 2017

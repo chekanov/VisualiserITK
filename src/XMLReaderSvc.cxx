@@ -14,7 +14,7 @@ InDet::XMLReaderSvc::XMLReaderSvc(const std::string& name) {
 
 
   debug=true;
-
+  m_layoutname=name;
   cout << "VisualiseXML: reading XML files from xml/"  << name << endl;
   string dir="xml/"+name+"/";
   m_xml_pixStaves=dir+"PixelStave.xml";
@@ -22,12 +22,13 @@ InDet::XMLReaderSvc::XMLReaderSvc(const std::string& name) {
   m_xml_pixmodules = dir+"PixelModules.xml";
   m_xml_pixBarrelLayers=dir+"PixelBarrel.xml";
   m_xml_pixEndcapLayers=dir+"PixelEndcap.xml";
+  m_xml_SimpleServices=dir+"PixelSimpleService.xml";
 
   cout << "  -> " << m_xml_materials << endl;
   cout << "  -> " <<  m_xml_pixStaves<< endl;
   cout << "  -> "  << m_xml_pixmodules << endl;
   cout << "  -> "  << m_xml_pixBarrelLayers << endl;
-
+  cout << "  -> "  << m_xml_SimpleServices<< endl;
 }
 
 
@@ -59,6 +60,7 @@ bool InDet::XMLReaderSvc::initialize()
   ATH_MSG_INFO("Reading Pixel Endcap Layer templates");
   parseFile(m_xml_pixEndcapLayers.c_str(),"PixelEndcapLayers","PixelEndcapRing");
   parseFile(m_xml_pixEndcapLayers.c_str(),"PixelEndcapLayers","PixelEndcapDisc");
+  parseFile(m_xml_SimpleServices.c_str(),"PixelServices","SimpleService");
 
 
 
@@ -100,6 +102,7 @@ void InDet::XMLReaderSvc::parseNode(std::string section, DOMNode *node)
    if(section.find("Material")              != std::string::npos) parseMaterialXML(node);
 //  else if(section.find("Component")        != std::string::npos) parseComponentXML(node);
    else if(section.find("FrontEndChip")     != std::string::npos) parseChipXML(node);
+   else if(section.find("SimpleService")     != std::string::npos) parseSimpleServiceXML(node);
    else if(section.find("Module")           != std::string::npos) parseModuleXML(node);
    else if(section.find("PixelStave")       != std::string::npos) parseStaveXML(node,m_tmp_pixStave);
    else if(section.find("PixelBarrelLayer") != std::string::npos) parseBarrelLayerXML(node,m_tmp_pixBarrelLayer);
@@ -364,6 +367,49 @@ void InDet::XMLReaderSvc::parseChipXML(DOMNode* node)
       chip->Print();
   }
 }
+
+//parsing simple service info added by (af)
+void InDet::XMLReaderSvc::parseSimpleServiceXML(DOMNode* node)
+{
+  
+  DOMNodeList* list = node->getChildNodes();
+  const XMLSize_t nodeCount = list->getLength();
+
+  // Create XML 16 bit strings
+  XMLCh* TAG_name      = transcode("NAME");
+  XMLCh* TAG_rmin    = transcode("RMIN");
+  XMLCh* TAG_rmax     = transcode("RMAX");
+  XMLCh* TAG_zmin = transcode("ZMIN");
+  XMLCh* TAG_zmax = transcode("ZMAX");
+   
+  SimpleServiceTubeTmp *simpleService = new SimpleServiceTubeTmp;
+  	for( XMLSize_t xx = 0; xx < nodeCount; ++xx ) {
+        	DOMNode* currentNode = list->item(xx);
+                if(currentNode->getNodeType() != DOMNode::ELEMENT_NODE) continue; // not an element
+  
+                                         // Found node which is an Element. Re-cast node as element
+          	 DOMElement* currentElement = dynamic_cast< xercesc::DOMElement* >( currentNode );
+	
+	if( XMLString::equals(currentElement->getTagName(), TAG_name))      simpleService->Name = getString(currentNode);
+   	else if( XMLString::equals(currentElement->getTagName(), TAG_rmin)) simpleService->Rmin = atof(getString(currentNode));
+   	else if( XMLString::equals(currentElement->getTagName(), TAG_rmax)) simpleService->Rmax = atof(getString(currentNode));
+ 	else if( XMLString::equals(currentElement->getTagName(), TAG_zmin)) simpleService->Zmin = atof(getString(currentNode));
+    	else if( XMLString::equals(currentElement->getTagName(), TAG_zmax)) simpleService->Zmax = atof(getString(currentNode));
+        
+        } //end of loop on node elements
+ 	       
+        cout<<"debug check for simple service"<<endl;                 
+         if((simpleService->Name)!=0) {
+      		 m_tmp_SimpleService.push_back(simpleService);
+      
+          simpleService->Print();
+	  cout<<"parsed Simple Service info"<<endl;
+	  
+       	  }
+        }
+        
+
+
 
 
 void InDet::XMLReaderSvc::parseEndcapXML(DOMNode* node, std::vector< InDet::EndcapLayerTmp *>& vtmp)
@@ -815,6 +861,20 @@ InDet::BarrelLayerTmp* InDet::XMLReaderSvc::getPixelBarrelLayerTemplate(unsigned
   BarrelLayerTmp *layer = m_tmp_pixBarrelLayer.at(ilayer);
   return layer;
 }
+
+std::vector<SimpleServiceTubeTmp *> InDet::XMLReaderSvc::getPixelSimpleServiceTubeTemplates() const
+{
+ // Get material template from list
+   unsigned int n = m_tmp_SimpleService.size();
+   std::vector< SimpleServiceTubeTmp *> simpleServices;
+
+     for(unsigned int i=0;i<n;i++) {
+        SimpleServiceTubeTmp *SimpleServiceTube = m_tmp_SimpleService.at(i);
+                     simpleServices.push_back( SimpleServiceTube);
+     }
+	return simpleServices;
+
+                    }
 
 
 void InDet::XMLReaderSvc::parseComponentXML(DOMNode* node)
