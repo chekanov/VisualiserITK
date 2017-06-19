@@ -12,4 +12,4 @@ The 3D model is constructed from the following files in Inclined_Alternative:
 ./xml/Inclined_Alternative/PixelSimpleService.xml -> ../ATLAS/data/InclBrl_PixelSimpleService.xml
 ./xml/Inclined_Alternative/PixelStave.xml -> ../ATLAS/share/InclBrl4Ref_InclinedAlternative_PixelStave.xml
 
-Fri Jun 16 18:14:40 UTC 2017
+Fri Jun 16 21:59:35 UTC 2017
