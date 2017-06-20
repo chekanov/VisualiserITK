@@ -43,16 +43,20 @@ using namespace xercesc;
 using namespace InDet;
 
 
-int main(int argc, char **argv)
+int main(int argc, char **argv)  
 {
-
+bool displayEndcaps = true;		//these booleans are used for debugging, set to false to hide certain parts
+bool displayBarrelAndRings = true;
+bool displaySimpleServices = true;
+bool displayBeamPipe = true;
+int argComplexity = 0;
 
 // Look for a help argument
         for (int i = 1; i < argc; ++i) {
                 const string arg = argv[i];
                 if (arg == "--help" || arg == "-h") {
                         cout << argv[0] << ": itkvis visualiser" << endl;
-                        cout << "Usage: " << argv[0] << "[<input geometry name from \"xml\"]" << endl;
+                        cout << "Usage: " << argv[0] << "[<input geometry name from \"xml\" and [style 0, 1 oe 2]" << endl;
                         cout << "This runs a ITKvisualiser" << endl;
                         exit(0);
                 }
@@ -60,12 +64,17 @@ int main(int argc, char **argv)
 
 
         string infile("-");
-        if (argc == 2) {
+        string style("0");
+
+        if (argc == 3) {
                 infile = argv[1];
+                style = argv[2];
         } else if (argc != 3) {
-                cerr << "Usage: " << argv[0] << "[<input geometry name from \"xml\"]" << endl;
+                cerr << "Usage: " << argv[0] << "[<input geometry name from \"xml\"] [style = 0, 1, 2]" << endl;
                 exit(1);
         }
+
+        argComplexity=atoi(style.c_str());
 
 
 #ifdef __CINT__
@@ -151,24 +160,30 @@ TGeoMedium *Ts = new TGeoMedium("Ts",12,12,0,0,0,20,0.1000000E+11,0.212,0.100000
 
    /* ------------------- show each parts of the detector -------------------*/
    // display pixel barrel
+   if(displayBarrelAndRings){
    ShowPixelBarrel *pixelBarrel = new ShowPixelBarrel();
-   pixelBarrel->process(reader,top, geom);
- 
+   pixelBarrel->process(reader,top, geom, argComplexity);
+   }
+	
    // display pixel endcap 
+   if(displayEndcaps){
    ShowPixelEndcap *pixelEndcap = new ShowPixelEndcap();
-   pixelEndcap->process(reader,top, geom);
- 
-    //display pixel simple services 
+   pixelEndcap->process(reader,top, geom,argComplexity);
+   }
+
+    //display pixel simple services
+    if(displaySimpleServices){ 
     ShowPixelSimpleService *pixelSimpleService = new ShowPixelSimpleService();
-    pixelSimpleService->process(reader,top, geom);
-    
+    pixelSimpleService->process(reader,top, geom,argComplexity);
+    }
 
    // beam pipe
+   if(displayBeamPipe){
    TGeoVolume *BEAMPIPE = geom->MakeTube("BeamPipe", Be , 32, 32, 3500);
    BEAMPIPE->SetLineColor(43);
    BEAMPIPE->SetTransparency(50);
    top->AddNode(BEAMPIPE, 0, new TGeoTranslation(0,0,0));
-
+   }
 
    //--- close the geometry
    geom->CloseGeometry();
@@ -193,7 +208,7 @@ TGeoMedium *Ts = new TGeoMedium("Ts",12,12,0,0,0,20,0.1000000E+11,0.212,0.100000
    TGeoVolume* itktop = gGeoManager->GetTopVolume();
    itktop->SetVisibility(kFALSE); // hide TGeoBBox shape in top volume
 
-   string out="out/"+infile+".root";
+   string out="out/"+infile+"_"+style+".root";
    cout << "Write file: " << out << endl;
    TFile* f = TFile::Open(out.c_str(),"recreate");
    itktop->Write("topvolume");
@@ -202,19 +217,19 @@ TGeoMedium *Ts = new TGeoMedium("Ts",12,12,0,0,0,20,0.1000000E+11,0.212,0.100000
 
 // this is fall-back solution, should work with most ROOT versions
   
-   out="out/"+infile+".json";
+   out="out/"+infile+"_"+style+".json";
    cout << "Write file: " << out << endl;
    TString json = TBufferJSON::ConvertToJSON(itktop, 3);
    std::ofstream ofs(out.c_str());
    ofs << json.Data();
    ofs.close();
 
-   out="out/"+infile+".png";
+   out="out/"+infile+"_"+style+".png";
    cout << "Write file: " << out << endl;
    gGeoManager->SaveAs(out.c_str());
 
 
-   out="out/"+infile+".gdml";
+   out="out/"+infile+"_"+style+".gdml";
    cout << "Write file: " << out << endl;
    // gGeoManager->SaveAs(out.c_str());
    gGeoManager->Export(out.c_str());

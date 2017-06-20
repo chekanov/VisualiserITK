@@ -88,7 +88,8 @@ namespace InDet {
     void parseBarrelLayerXML(DOMNode* node, std::vector< BarrelLayerTmp *>& vtmp);
     void parseEndcapXML(DOMNode* node, std::vector< EndcapLayerTmp *>& vtmp);
     void parseSimpleServiceXML(DOMNode* node);
-     void computeModuleSize(ModuleTmp *module);
+    void computeModuleSize(ModuleTmp *module);
+    void parseEndcapDiskSupportXML(DOMNode* node);
 
     // Data members
     std::string m_dictionaryFileName;
@@ -103,7 +104,8 @@ namespace InDet {
     std::string m_xml_sctEndcapLayers;
     std::string m_xml_SimpleServices;
     std::string m_layoutname;
-
+    std::string m_xml_EndcapDiskSupports;
+   
     std::vector< MaterialTmp *>    m_tmp_material;
     std::vector< ComponentTmp *>   m_tmp_component;
     std::vector< ChipTmp *>        m_tmp_chip;

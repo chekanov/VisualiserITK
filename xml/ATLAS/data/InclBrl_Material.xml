@@ -340,6 +340,29 @@
     <linearweight> 0 </linearweight>
   </MaterialWeight>
 
+
+<!-- InclinedQuads values -->
+  <MaterialWeight>
+    <name> Default_Slim_InclBrl4_InclDual_L2L3_3CL_Fixed_Weight </name>
+    <base> CarbonFibre </base>
+    <weight> 66.0 </weight>
+    <linearweight> 0 </linearweight>
+  </MaterialWeight>
+  
+  <MaterialWeight>
+    <name> Default_Slim_InclBrl4_InclDual_L2L3_4CL_Fixed_Weight </name>
+    <base> CarbonFibre </base>
+    <weight> 66.0 </weight>
+    <linearweight> 0 </linearweight>
+  </MaterialWeight>
+
+  <MaterialWeight>
+    <name> Default_Slim_InclBrl4_InclDual_L3L4_Fixed_Weight </name>
+    <base> CarbonFibre </base>
+    <weight> 49.5 </weight>
+    <linearweight> 0 </linearweight>
+  </MaterialWeight>
+
 <!-- ITk pixel stave materials by Ben -->
 
 <!-- Step 1.9 and older values -->
@@ -1034,6 +1057,13 @@
     <component> <name> pix::ThermalInterfaceMaterial </name> <weight> 0.56 </weight> </component>
   </Material>
 
+  <Material>
+    <name> ChipBasePlusTIM_Plus3DSupportWafer </name>
+    <density> 2.27 </density>
+    <component> <name> pix::ChipBasePlusTIM          </name> <weight> 0.79 </weight> </component>
+    <component> <name> Silicon                       </name> <weight> 0.21 </weight> </component>
+  </Material>
+
   <MaterialWeight>
     <name> Chip_FourChip </name>
     <base> ChipBasePlusTIM </base>
@@ -1052,6 +1082,27 @@
     <name> Chip_SimpleChip </name>
     <base> ChipBasePlusTIM </base>
     <weight> .33 </weight> 
+    <linearweight> 0 </linearweight>
+  </MaterialWeight>
+
+  <MaterialWeight>
+    <name> Chip_FourChip_3D </name>
+    <base> ChipBasePlusTIM_Plus3DSupportWafer </base>
+    <weight> 1.68 </weight> 
+    <linearweight> 0 </linearweight>
+  </MaterialWeight>
+
+  <MaterialWeight>
+    <name> Chip_DoubleChip_3D </name>
+    <base> ChipBasePlusTIM_Plus3DSupportWafer </base>
+    <weight> .84 </weight> 
+    <linearweight> 0 </linearweight>
+  </MaterialWeight>
+
+  <MaterialWeight>
+    <name> Chip_SimpleChip_3D </name>
+    <base> ChipBasePlusTIM_Plus3DSupportWafer </base>
+    <weight> .42 </weight> 
     <linearweight> 0 </linearweight>
   </MaterialWeight>
 

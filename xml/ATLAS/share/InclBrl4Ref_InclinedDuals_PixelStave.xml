@@ -5,13 +5,13 @@
   <Type>  Alpine  </Type>                             
   <Layer> 0 </Layer>                              
   <NBarrelModules>  6 </NBarrelModules>                             
-  <BarrelModuleType>  DoubleLength_RD53_20x19_thin  </BarrelModuleType>                             
+  <BarrelModuleType> DoubleLength_RD53_20x19_3D </BarrelModuleType> <!-- DoubleLength_RD53_20x19_thin -->
   <BarrelModuleTilt>  -0.24435  </BarrelModuleTilt>                             
   <BarrelModuleGap> 0.2 </BarrelModuleGap>                              
   <BarrelModuleRShift>  0 </BarrelModuleRShift>                             
   <MountainPosOnStavePlane> 253.6 276.8 301.6 330.7 364.9 405.1 452.3 507.8 573.0 638.5 703.9 766.9 836.5 913.9 999.7 1095.1  </MountainPosOnStavePlane>
   <MountainModuleAngle> 0.2618  </MountainModuleAngle>                              
-  <MountainModuleType>  SingleChip_RD53_20x19_Rot_thin  </MountainModuleType>                             
+  <MountainModuleType> SingleChip_RD53_20x19_Rot_3D </MountainModuleType> <!-- SingleChip_RD53_20x19_Rot_thin -->
   <MountainModuleRShift>  15.5  </MountainModuleRShift>                             
   <StaveSupportLength>  1150.0  </StaveSupportLength>                             
 </PixelStave>                                   

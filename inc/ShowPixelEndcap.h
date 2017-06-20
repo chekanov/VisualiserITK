@@ -42,7 +42,7 @@ class ShowPixelEndcap {
 
     virtual ~ShowPixelEndcap(){};
 
-    bool process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeoManager *geom);
+    bool process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeoManager *geom,int complexity);
 
 };
 

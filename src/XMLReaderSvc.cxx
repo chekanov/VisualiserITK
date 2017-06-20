@@ -23,12 +23,15 @@ InDet::XMLReaderSvc::XMLReaderSvc(const std::string& name) {
   m_xml_pixBarrelLayers=dir+"PixelBarrel.xml";
   m_xml_pixEndcapLayers=dir+"PixelEndcap.xml";
   m_xml_SimpleServices=dir+"PixelSimpleService.xml";
+  m_xml_EndcapDiskSupports=dir+"PixelEndcapDiskSupports.xml"; 
+
 
   cout << "  -> " << m_xml_materials << endl;
   cout << "  -> " <<  m_xml_pixStaves<< endl;
   cout << "  -> "  << m_xml_pixmodules << endl;
   cout << "  -> "  << m_xml_pixBarrelLayers << endl;
   cout << "  -> "  << m_xml_SimpleServices<< endl;
+  cout << "  -> "  << m_xml_EndcapDiskSupports<< endl;
 }
 
 
@@ -61,6 +64,10 @@ bool InDet::XMLReaderSvc::initialize()
   parseFile(m_xml_pixEndcapLayers.c_str(),"PixelEndcapLayers","PixelEndcapRing");
   parseFile(m_xml_pixEndcapLayers.c_str(),"PixelEndcapLayers","PixelEndcapDisc");
   parseFile(m_xml_SimpleServices.c_str(),"PixelServices","SimpleService");
+ // parseFile(m_xml_EndcapDiskSupports.c_str(),"PixelRingSupports","PixelRingSupport");
+ // parseFile(m_xml_EndcapDiskSupports.c_str(),"PixelRingSupports","PixelRingSupportGeo");
+ // parseFile(m_xml_EndcapDiskSupports.c_str(),"PixelRingSupports","PixelLayerSupport");
+  parseFile(m_xml_EndcapDiskSupports.c_str(),"PixelRingSupports","PixelLayerSupportGeo");
 
 
 
@@ -108,6 +115,10 @@ void InDet::XMLReaderSvc::parseNode(std::string section, DOMNode *node)
    else if(section.find("PixelBarrelLayer") != std::string::npos) parseBarrelLayerXML(node,m_tmp_pixBarrelLayer);
    else if(section.find("PixelEndcapRing" ) != std::string::npos) parseEndcapXML(node,m_tmp_pixEndcapLayer);
    else if(section.find("PixelEndcapDisc" ) != std::string::npos) parseEndcapXML(node,m_tmp_pixEndcapLayer);
+   else if(section.find("PixelRingSupport") != std::string::npos) parseEndcapDiskSupportXML(node);
+   else if(section.find("PixelLayerSupport") != std::string::npos) parseEndcapDiskSupportXML(node);
+   else if(section.find("PixelRingSupportGeo") != std::string::npos) parseEndcapDiskSupportXML(node);
+   else if(section.find("PixelLayerSupportGeo") != std::string::npos) parseEndcapDiskSupportXML(node);
 //  else if(section.find("SCTStave")         != std::string::npos) parseStaveXML(node,m_tmp_sctStave);
 //  else if(section.find("SCTBarrelLayer")   != std::string::npos) parseBarrelLayerXML(node,m_tmp_sctBarrelLayer);
 //   else if(section.find("SCTEndcapRing")    != std::string::npos) parseEndcapXML(node,m_tmp_sctEndcapLayer);
@@ -407,8 +418,54 @@ void InDet::XMLReaderSvc::parseSimpleServiceXML(DOMNode* node)
 	  
        	  }
         }
-        
 
+
+//parse Endcap Disk Supports --------------------------------------------------------------------------------------------------------(af)        
+void InDet::XMLReaderSvc::parseEndcapDiskSupportXML(DOMNode* node)
+{
+
+  DOMNodeList* list = node->getChildNodes();
+  const XMLSize_t nodeCount = list->getLength();
+  XMLCh* TAG_name      = transcode("name");
+  XMLCh* TAG_rmin    = transcode("rmin");
+  XMLCh* TAG_rmax     = transcode("rmax");
+  XMLCh* TAG_thickness = transcode("thickness");
+  XMLCh* TAG_ringSupportGeo = transcode("RingSupportGeo");
+  XMLCh* TAG_layerSupportGeo = transcode("LayerSupportGeo");
+  XMLCh* TAG_r = transcode("r");
+  XMLCh* TAG_z = transcode("z");
+  XMLCh* TAG_layer = transcode("Layer");
+
+
+
+   
+  SimpleServiceTubeTmp *endcapLayerSupport = new SimpleServiceTubeTmp;
+        for( XMLSize_t xx = 0; xx < nodeCount; ++xx ) {
+                DOMNode* currentNode = list->item(xx);
+                if(currentNode->getNodeType() != DOMNode::ELEMENT_NODE) continue; //not an element
+  
+  DOMElement* currentElement = dynamic_cast< xercesc::DOMElement* >( currentNode );
+
+        if( XMLString::equals(currentElement->getTagName(), TAG_name))      endcapLayerSupport->Name = getString(currentNode);
+        else if( XMLString::equals(currentElement->getTagName(), TAG_r)){
+		 endcapLayerSupport->Rmin =getVectorDouble(currentNode)[0];
+		 endcapLayerSupport->Rmax =getVectorDouble(currentNode)[1];
+        }
+	 //else if( XMLString::equals(currentElement->getTagName(), TAG_rmax)) endcapLayerSupport->Rmax = atof(getString(currentNode));
+        else if( XMLString::equals(currentElement->getTagName(), TAG_z)){
+		 endcapLayerSupport->Zmin = getVectorDouble(currentNode)[0];
+		 endcapLayerSupport->Zmax = getVectorDouble(currentNode)[1];
+		 }
+        //else if( XMLString::equals(currentElement->getTagName(), TAG_zmax)) endcapLayerSupport->Zmax = atof(getString(currentNode));
+	} //end loop on node elements
+
+	if((endcapLayerSupport->Name)!=0) {
+                 m_tmp_SimpleService.push_back(endcapLayerSupport);
+
+          endcapLayerSupport->Print();
+          cout<<"parsed endcap support info"<<endl;
+   }
+}
 
 
 
@@ -439,6 +496,7 @@ void InDet::XMLReaderSvc::parseEndcapXML(DOMNode* node, std::vector< InDet::Endc
   XMLCh* TAG_stereoSep       = transcode("RingModuleStereoSeparation");
   XMLCh* TAG_doublesided     = transcode("DoubleSided");
   XMLCh* TAG_useDiscSurface  = transcode("UseDiscSurface");
+  XMLCh* TAG_SplitOffset  = transcode("SplitOffset");
 
 // temporary variables
   std::string name;
@@ -452,6 +510,7 @@ void InDet::XMLReaderSvc::parseEndcapXML(DOMNode* node, std::vector< InDet::Endc
   double stereoSep = 0.;
   bool double_sided = false;
   bool usediscsurf  = false;
+  double splitOffSet = 0;
 
   std::vector<std::string> tmpmodtype;
   std::vector<double> tmpradius;
@@ -485,6 +544,8 @@ void InDet::XMLReaderSvc::parseEndcapXML(DOMNode* node, std::vector< InDet::Endc
     else if (XMLString::equals(currentElement->getTagName(),TAG_zoffset))         tmpzoffset    = getVectorDouble(currentNode);
     else if (XMLString::equals(currentElement->getTagName(),TAG_phioffset))       tmpphioffset  = getVectorDouble(currentNode);
     else if (XMLString::equals(currentElement->getTagName(),TAG_ringpos))         tmpringpos    = getVectorDouble(currentNode);
+    else if (XMLString::equals(currentElement->getTagName(),TAG_SplitOffset))     splitOffSet   = atoi(getString(currentNode));
+
   }
 
   // If different number of entries for rings fields, use the values of ring 0 everywhere
@@ -545,6 +606,8 @@ void InDet::XMLReaderSvc::parseEndcapXML(DOMNode* node, std::vector< InDet::Endc
   layer->stereoO             = stereoOuter;
   layer->stereoSep           = stereoSep;
   layer->useDiscSurface      = usediscsurf;
+  layer->splitOffSet         = splitOffSet;
+
   // disc layer
   if(layer_index<0) {
     layer->ilayer = disc_index;

@@ -2,7 +2,7 @@
 #include <cmath>
 
 // implementation of the endcap drawing
-bool ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeoManager* geom)
+bool ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeoManager* geom,int complexity)
 {
 
 
@@ -80,6 +80,7 @@ bool ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
 			
 					
 			//-------------Sectors added here
+			if(complexity!=2){
 			int nSectors;
 			double angleSector;
 			if(layer->nsectors[1]==0){
@@ -102,17 +103,19 @@ bool ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
 				ring_obj->AddNode(sect_obj,iS+1,new TGeoTranslation(0,0,layer->zoffset[0]));
 				ring_obj->AddNode(sect_obj,iS+1,new TGeoTranslation(0,0,-layer->zoffset[0]));
 			}
-			
+			}
 			
 			
 
 			//------adds rings to assemblies
-			assembly_rings->AddNode(ring_obj,iR+1,new TGeoCombiTrans(0,0,ringposition,0));
-			assembly_rings->AddNode(ring_obj,iR+1,new TGeoCombiTrans(0,0,ringposition,rot));
-                        assembly_rings->AddNode(ring_obj,iR+1+nRings,new TGeoCombiTrans(0,0,-ringposition,0));
-                        assembly_rings->AddNode(ring_obj,iR+1+nRings,new TGeoCombiTrans(0,0,-ringposition,rot));
-                       	//^^^^adds the other side of the detector as a mirror
-                        
+			assembly_rings->AddNode(ring_obj,iR+1,new TGeoCombiTrans(0,0,ringposition+(layer->splitOffSet/2),0));
+			assembly_rings->AddNode(ring_obj,iR+1,new TGeoCombiTrans(0,0,ringposition-(layer->splitOffSet/2),rot));//halfrings are shifted away to make room for services
+			if(complexity==0||complexity==2){
+                        assembly_rings->AddNode(ring_obj,iR+1+nRings,new TGeoCombiTrans(0,0,-ringposition+(layer->splitOffSet/2),0));//not sure which side is shifted in which direction right now its arbitrary
+                        assembly_rings->AddNode(ring_obj,iR+1+nRings,new TGeoCombiTrans(0,0,-ringposition-(layer->splitOffSet/2),rot));
+                       	//^^^^adds the other side of the detector as a mirror provided the user set complexity at an appropriate value
+                        }
+
 			assembly_layer->AddNode(assembly_rings,iR+1,new TGeoTranslation(0,0,0));
 			
 		}

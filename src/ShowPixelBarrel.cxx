@@ -4,7 +4,7 @@
 */
 #include "ShowPixelBarrel.h"
 
-bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeoManager* geom)
+bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeoManager* geom,int complexity)
 {
 
 
@@ -95,7 +95,7 @@ bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
       assembly_stave->AddNode(stave_obj,ist+1 , new TGeoCombiTrans(0,0,0,rot));
     
      //stave "mountain" modules aka. barrel ring modules
-     if(stave_type.compare("Alpine")==0){
+     if(stave_type.compare("Alpine")==0&&complexity<2){
 	cout<<"about to read alpine module templates stavetype: "<<stave_type<<endl;
      InDet::ModuleTmp* ringModule = reader.getModuleTemplate(stave->alp_type);
      std::vector<double> rmodule_pos = stave->alp_pos;		
@@ -110,7 +110,7 @@ bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
      
      //add Barrel ring modules
      for(int irmod=0;irmod<rmodule_pos.size();irmod++){
-	TGeoVolume * rmodule_obj =  geom->MakeBox(rmodule_name.c_str(),Si,rmodule_thickness,0.5*rmodule_length,0.5*rmodule_width);
+	TGeoVolume * rmodule_obj =  geom->MakeBox(rmodule_name.c_str(),Si,rmodule_thickness,0.5*rmodule_width,0.5*rmodule_length);
         rmodule_obj->SetLineColor(80);
         rmodule_obj->SetFillColor(80);
         rmodule_obj->SetTransparency(70);
@@ -122,8 +122,10 @@ bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
 
 
 	assembly_barrelring->AddNode(rmodule_obj,irmod+1,new TGeoCombiTrans(0,0,rmodule_pos[irmod],ringRot));
+	if(complexity==0||complexity==2){ //only displays half the detector if the complexity is not set to 0 or 2
 	assembly_barrelring->AddNode(rmodule_obj,irmod+1,new TGeoCombiTrans(0,0,-rmodule_pos[irmod],ringRotFlipped));
-	
+	}
+
 	float  ringxpos=(layer_radius-stave_thickness+rmodule_rshift)*TMath::Cos(sector_phi*ist);
         float ringypos=(layer_radius-stave_thickness+rmodule_rshift)*TMath::Sin(sector_phi*ist);
 
@@ -146,6 +148,7 @@ bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
 
 
 // add modules
+      if(complexity!=2){
       int nmodplain = stave->b_modn;
       int nmodtrans = 2*stave->trans_pos.size();
       int NMOD = nmodtrans + nmodplain;
@@ -180,7 +183,7 @@ bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
   
       stave->Print();
      }; // end loop over staves 
-
+    }
  	/*//support rings for barrel
  	string supportRingName = "BarrelSupportRing";
 	TGeoVolume *supportRing_obj =geom->MakeTube(supportRingName.c_str(),Al,layer_radius-10,layer_radius+10,10);

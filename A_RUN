@@ -3,22 +3,47 @@
 
 function run_me() {
                  geom=$1
-                ./itkvis $geom
-                 echo "Make description for $geom"
-                 echo " ==== 3D model for  $geom ====" > out/${geom}.txt 
-                 echo " " >> out/${geom}.txt 
-                 echo "used xml files from:" >> out/${geom}.txt 
-                 echo "https://svnweb.cern.ch/trac/atlasoff/browser//InnerDetector/InDetTrackingGeometryXML/trunk/share/" >> out/${geom}.txt
-                 echo "https://svnweb.cern.ch/trac/atlasoff/browser/InnerDetector/InDetDetDescr/PixelLayouts/BarrelInclinedRef/trunk/data/" >> out/${geom}.txt
-                 echo ""  >>  out/${geom}.txt
-                 echo "The 3D model is constructed from the following files in $geom:" >> out/${geom}.txt 
-                 ls -l ./xml/$geom/*.xml | sed -e"s/ \+/ /g" | cut -d' ' -f 9- >> out/${geom}.txt 
-                 echo ""  >> out/${geom}.txt 
-                 date -u >> out/${geom}.txt 
+                 style=$2
+                ./itkvis $geom $style 
+                 echo "Make description for $geom and style $style"
+
+
+                 description_file=out/${geom}_${style}.txt
+               
+                  txt_style="Full description with modules and no cliping" 
+                  if [ "$style" -eq "2" ]; then
+                    txt_style="Light-weight presentation without mounted modules"
+                  fi
+                  if [ "$style" -eq "1" ]; then
+                    txt_style="Light-weight presentation with Z cliping"
+                  fi
+
+                 echo " ==== 3D model for  $geom ====" > $description_file 
+                 echo "$txt_style" >>  $description_file
+                 echo " " >>  $description_file 
+                 echo "used xml files from:" >> $description_file 
+                 echo "https://svnweb.cern.ch/trac/atlasoff/browser//InnerDetector/InDetTrackingGeometryXML/trunk/share/" >> $description_file 
+                 echo "https://svnweb.cern.ch/trac/atlasoff/browser/InnerDetector/InDetDetDescr/PixelLayouts/BarrelInclinedRef/trunk/data/" >> $description_file 
+                 echo ""  >>  $description_file 
+                 echo "The 3D model is constructed from the following files in $geom:" >> $description_file 
+                 ls -l ./xml/$geom/*.xml | sed -e"s/ \+/ /g" | cut -d' ' -f 9- >> $description_file 
+                 echo ""  >> $description_file 
+                 date -u >> $description_file 
                 }  
 
 
+# no modules, light-weight presentation
+run_me Inclined_Quads 2 
+run_me Inclined_Duals 2 
+run_me Inclined_Alternative 2
 
-run_me Inclined_Quads
-run_me Inclined_Duals
-run_me Inclined_Alternative 
+# cliping in Z (positive Z)
+run_me Inclined_Quads 1 
+run_me Inclined_Duals 1 
+run_me Inclined_Alternative 1 
+
+# full presentation with modules, no cliping 
+run_me Inclined_Quads 0
+run_me Inclined_Duals 0
+run_me Inclined_Alternative 0 
+ 

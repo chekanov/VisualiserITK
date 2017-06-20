@@ -12,13 +12,11 @@ NN=0
 if (len(sys.argv) ==2):
    myinput = sys.argv[1]
 
-
-
-xname="Inclined_Duals.gdml"
+xname="Inclined_Duals_0.gdml"
 TGeoManager.Import("out/"+xname);
-gGeoManager.SetMaxVisNodes(100000);
-gGeoManager.ViewLeaves(True)
-gGeoManager.SetVisLevel(64) # change it to make faster 
+gGeoManager.SetMaxVisNodes(50000);
+gGeoManager.ViewLeaves(True);
+gGeoManager.SetVisLevel(6);
 allvolumes = gGeoManager.GetListOfVolumes();
 for i in range(allvolumes.GetEntries()):
             vol= allvolumes.At(i);

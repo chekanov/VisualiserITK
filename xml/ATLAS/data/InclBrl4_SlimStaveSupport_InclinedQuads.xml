@@ -65,7 +65,7 @@
     <BarrelZMax>      324.0  </BarrelZMax>
     <RadialLengthEOS>  23.6  </RadialLengthEOS>
     <WallThickness>     0.3  </WallThickness>
-    <CornerThickness>   5.0 </CornerThickness>
+    <CornerThickness>   4.0 </CornerThickness>
     <XStepLowR>        13.9  </XStepLowR>
     <XStepHighR>        0.0  </XStepHighR>
     <PhiStepSize>       2.0  </PhiStepSize>
@@ -94,7 +94,7 @@
     <BarrelZMax>      324.0  </BarrelZMax>
     <RadialLengthEOS>  23.6  </RadialLengthEOS>
     <WallThickness>     0.3  </WallThickness>
-    <CornerThickness>   5.0 </CornerThickness>
+    <CornerThickness>   4.0 </CornerThickness>
     <XStepLowR>        13.9  </XStepLowR>
     <XStepHighR>        0.0  </XStepHighR>
     <PhiStepSize>       2.0  </PhiStepSize>
@@ -124,7 +124,7 @@
     <BarrelZMax>      324.0  </BarrelZMax>
     <RadialLengthEOS>  23.6  </RadialLengthEOS>
     <WallThickness>     0.3  </WallThickness>
-    <CornerThickness>   5.0 </CornerThickness>
+    <CornerThickness>   4.0 </CornerThickness>
     <XStepLowR>        13.9  </XStepLowR>
     <XStepHighR>        0.0  </XStepHighR>
     <PhiStepSize>       2.0  </PhiStepSize>

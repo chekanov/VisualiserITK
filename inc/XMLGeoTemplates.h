@@ -188,7 +188,7 @@ namespace InDet {
 
   class EndcapLayerTmp {
   public:
-    EndcapLayerTmp() {  ilayer = -1; layer_pos = -1; stereoI = stereoO = stereoSep = 0.; double_sided = isDisc = useDiscSurface = false;}
+    EndcapLayerTmp() {  ilayer = -1; layer_pos = -1; stereoI = stereoO = stereoSep = 0.; double_sided = isDisc = useDiscSurface = false;splitOffSet = 0;}
     ~EndcapLayerTmp() {}
     
     inline void Print() {
@@ -212,6 +212,7 @@ namespace InDet {
     std::string support_material; //  = "DefaultPixelRingMaterial";
     double stereoI,stereoO, stereoSep;
     bool double_sided;
+    double splitOffSet;
 
     // rings parameters
     std::vector<std::string> modtype;

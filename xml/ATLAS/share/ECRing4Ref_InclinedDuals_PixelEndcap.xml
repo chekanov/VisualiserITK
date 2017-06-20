@@ -12,7 +12,23 @@
   <NumberOfSectors> 22  16  22  16  22  16  22  16  22  22  22  22  22  22  22  </NumberOfSectors>
   <SplitMode>   Middle  </SplitMode>                            
   <SplitOffset> 10.00 </SplitOffset>                            
-  <RingModuleType>  FourChip_RD53_20x19_thin  </RingModuleType>                           
+  <RingModuleType>  
+    FourChip_RD53_20x19_thin 
+    FourChip_RD53_20x19_3D 
+    FourChip_RD53_20x19_thin 
+    FourChip_RD53_20x19_3D 
+    FourChip_RD53_20x19_thin 
+    FourChip_RD53_20x19_3D 
+    FourChip_RD53_20x19_thin 
+    FourChip_RD53_20x19_3D 
+    FourChip_RD53_20x19_thin 
+    FourChip_RD53_20x19_thin 
+    FourChip_RD53_20x19_thin 
+    FourChip_RD53_20x19_thin 
+    FourChip_RD53_20x19_thin 
+    FourChip_RD53_20x19_thin 
+    FourChip_RD53_20x19_thin 
+  </RingModuleType>
   <RingModuleZSeparation> 6.0 </RingModuleZSeparation>                            
 </PixelEndcapRing>                                  
                                   
