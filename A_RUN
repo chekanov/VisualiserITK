@@ -18,6 +18,10 @@ function run_me() {
                     txt_style="Light-weight presentation with Z cliping"
                   fi
 
+                  if [ "$style" -eq "3" ]; then
+                    txt_style="First two layers (USA built)"
+                  fi
+
                  echo " ==== 3D model for  $geom ====" > $description_file 
                  echo "$txt_style" >>  $description_file
                  echo " " >>  $description_file 
@@ -31,6 +35,10 @@ function run_me() {
                  date -u >> $description_file 
                 }  
 
+#only the first two layers, US build use
+run_me Inclined_Quads 3
+run_me Inclined_Duals 3
+run_me Inclined_Alternative 3
 
 # no modules, light-weight presentation
 run_me Inclined_Quads 2 

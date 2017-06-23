@@ -4,7 +4,7 @@
 */
 #include "ShowPixelBarrel.h"
 
-bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeoManager* geom,int complexity)
+bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeoVolume* innerDetector, TGeoVolume* fullDetector, TGeoManager* geom,int complexity)
 {
 
 
@@ -15,19 +15,41 @@ bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
    const float PI2=2*TMath::Pi();
 
 
-//--- define some materials
+//--- define some default materials
    TGeoMaterial *matVacuum = new TGeoMaterial("Vacuum", 0,0,0);
    TGeoMaterial *matAl = new TGeoMaterial("Al", 26.98,13,2.7);
-//   //--- define some media
    TGeoMedium *Vacuum = new TGeoMedium("Vacuum",1, matVacuum);
    TGeoMedium *Al = new TGeoMedium("Aluminium",2, matAl);
    TGeoMedium *Si = new TGeoMedium("Si",7,7,0,0,0,20,0.1000000E+11,0.212,0.1000000E-02,1.150551);
 
-   string pixelBarrelName = "PixelBarrel";
-   TGeoVolume *pixel_barrel = new TGeoVolumeAssembly(pixelBarrelName.c_str());
-   
-   string pixelBarrelRingsName = "PixelBarrelRings";
-   TGeoVolume *pixelBarrelRings_Assembly = new TGeoVolumeAssembly(pixelBarrelRingsName.c_str());
+// get specified materials
+   std::vector<MaterialTmp *> materials = reader.getMaterials();
+   TGeoMaterial *matModule;
+   TGeoMedium *medModule;
+   TGeoMaterial *matStave;
+   TGeoMedium *medStave;
+   for(int m = 0; m<materials.size();m++){
+     MaterialTmp* material = materials.at(m);
+     if(material->name=="DefaultPixelModuleMaterial"){
+        matModule = new TGeoMaterial("PixelModuleMaterial",0,0,material->density);
+        medModule = new TGeoMedium("PixelModuleMedium",1,matModule);
+     }
+     if(material->name=="DefaultPixelStaveMaterial"){
+        matStave = new TGeoMaterial("PixelStaveMaterial",0,0,material->density);
+        medStave = new TGeoMedium("PixelStaveMedium",2,matStave);
+     }
+   }  
+
+   string innerPixelBarrelName = "InnerPixelBarrel";
+   TGeoVolume *innerPixelBarrel = new TGeoVolumeAssembly(innerPixelBarrelName.c_str());
+   string PixelBarrelName = "PixelBarrel";
+   TGeoVolume *PixelBarrel = new TGeoVolumeAssembly(PixelBarrelName.c_str());
+
+   string innerPixelBarrelRingsName = "InnerPixelBarrelRings";
+   TGeoVolume *innerPixelBarrelRings = new TGeoVolumeAssembly(innerPixelBarrelRingsName.c_str());
+   string PixelBarrelRingsName = "PixelBarrelRings";
+   TGeoVolume *PixelBarrelRings = new TGeoVolumeAssembly(PixelBarrelRingsName.c_str());
+
 
     // look at layers and build them
     std::vector< BarrelLayerTmp *> layers = reader.getPixelBarrelLayers();
@@ -85,17 +107,17 @@ bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
       TGeoVolume *assembly_barrelring = new TGeoVolumeAssembly(barrelringname.c_str());
 
       stavename="Support ("+stave_type+")"; // +std::to_string(istave+1);
-      TGeoVolume *stave_obj = geom->MakeBox(stavename.c_str(), Al, stave_thickness, 0.5*stave_width, stave->support_halflength);
+      TGeoVolume *stave_obj = geom->MakeBox(stavename.c_str(), medStave, stave_thickness, 0.5*stave_width, stave->support_halflength);
       stave_obj->SetLineColor(kRed);
       stave_obj->SetTransparency(70);  //root.cern.ch/doc/v608/classTGeoTranslation.html ;
      // rotate stave
-      //TGeoTranslation * translate_stave = new TGeoTranslation(ll,0,0); 
+     //TGeoTranslation * translate_stave = new TGeoTranslation(ll,0,0); 
       TGeoRotation * rot = new TGeoRotation(); 
       rot->SetAngles(0, 0, 0); 
       assembly_stave->AddNode(stave_obj,ist+1 , new TGeoCombiTrans(0,0,0,rot));
     
      //stave "mountain" modules aka. barrel ring modules
-     if(stave_type.compare("Alpine")==0&&complexity<2){
+     if(stave_type.compare("Alpine")==0&&complexity!=2){
 	cout<<"about to read alpine module templates stavetype: "<<stave_type<<endl;
      InDet::ModuleTmp* ringModule = reader.getModuleTemplate(stave->alp_type);
      std::vector<double> rmodule_pos = stave->alp_pos;		
@@ -110,7 +132,7 @@ bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
      
      //add Barrel ring modules
      for(int irmod=0;irmod<rmodule_pos.size();irmod++){
-	TGeoVolume * rmodule_obj =  geom->MakeBox(rmodule_name.c_str(),Si,rmodule_thickness,0.5*rmodule_width,0.5*rmodule_length);
+	TGeoVolume * rmodule_obj =  geom->MakeBox(rmodule_name.c_str(),medModule,rmodule_thickness,0.5*rmodule_width,0.5*rmodule_length);
         rmodule_obj->SetLineColor(80);
         rmodule_obj->SetFillColor(80);
         rmodule_obj->SetTransparency(70);
@@ -122,7 +144,7 @@ bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
 
 
 	assembly_barrelring->AddNode(rmodule_obj,irmod+1,new TGeoCombiTrans(0,0,rmodule_pos[irmod],ringRot));
-	if(complexity==0||complexity==2){ //only displays half the detector if the complexity is not set to 0 or 2
+	if(complexity!=1){ //only displays half the detector if the complexity is set to 1
 	assembly_barrelring->AddNode(rmodule_obj,irmod+1,new TGeoCombiTrans(0,0,-rmodule_pos[irmod],ringRotFlipped));
 	}
 
@@ -154,7 +176,7 @@ bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
       int NMOD = nmodtrans + nmodplain;
       // add modules 
       for (int imod=0; imod<NMOD; imod++) {
-        TGeoVolume * module_obj =  geom->MakeBox(module_name.c_str(),Si,module_thickness,0.5*module_width,0.5*module_length);
+        TGeoVolume * module_obj =  geom->MakeBox(module_name.c_str(),medModule,module_thickness,0.5*module_width,0.5*module_length);
         module_obj->SetLineColor(80);
         module_obj->SetFillColor(80);
         module_obj->SetTransparency(70);
@@ -205,13 +227,18 @@ bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
       fullname="Layer"; //  + std::to_string(i);
       assembly_layer->AddNode(LAYER, i+1, new TGeoTranslation(0,0,0));
 
-      
-      pixel_barrel->AddNode(assembly_layer, i+1, new TGeoTranslation(0,0,0));
-      pixelBarrelRings_Assembly->AddNode(ringLayer_Assembly,i+1,new TGeoTranslation(0,0,0));       
+//    add the layers to the appropriate assemblies
+      if(i<2)innerPixelBarrel->AddNode(assembly_layer, i+1, new TGeoTranslation(0,0,0));
+      PixelBarrel->AddNode(assembly_layer, i+1, new TGeoTranslation(0,0,0));
+      if(i<2) innerPixelBarrelRings->AddNode(ringLayer_Assembly,i+1,new TGeoTranslation(0,0,0));
+      PixelBarrelRings->AddNode(ringLayer_Assembly,i+1,new TGeoTranslation(0,0,0));       
     }
-
-   top->AddNode(pixel_barrel,1,new TGeoTranslation(0,0,0));
-   top->AddNode(pixelBarrelRings_Assembly,1,new TGeoTranslation(0,0,0));
+	//add the assemblies to the inner and full detector assemblies
+   innerDetector->AddNode(innerPixelBarrel,1,new TGeoTranslation(0,0,0));
+   innerDetector->AddNode(innerPixelBarrelRings,1,new TGeoTranslation(0,0,0));
+   fullDetector->AddNode(PixelBarrel,1,new TGeoTranslation(0,0,0));
+   fullDetector->AddNode(PixelBarrelRings,1,new TGeoTranslation(0,0,0));
+   
 
    return true;
 } 

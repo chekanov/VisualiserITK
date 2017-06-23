@@ -2,26 +2,47 @@
 #include <cmath>
 
 // implementation of the endcap drawing
-bool ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeoManager* geom,int complexity)
+bool ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeoVolume* innerDetector, TGeoVolume* fullDetector, TGeoManager* geom,int complexity)
 {
-
 
    // define some constants
    const double degree=57.2958;
    const double PI=TMath::Pi();
    const double PI2=2*TMath::Pi();
 
-
-//--- define some materials
-   TGeoMaterial *matVacuum = new TGeoMaterial("Vacuum", 0,0,0);
+//get materials from xml reader
+   bool hasModuleMat = false;
+   bool hasRingMat = false;       //booleans to check if the materials were gathered
+   std::vector<MaterialTmp *> materials = reader.getMaterials();
+   TGeoMaterial *matModule;
+   TGeoMedium *medModule;
+   TGeoMaterial *matRing;
+   TGeoMedium *medRing; 
+   for(int m = 0; m<materials.size();m++){
+     MaterialTmp* material = materials.at(m);
+     if(material->name=="DefaultPixelModuleMaterial"){
+        matModule = new TGeoMaterial("PixelModuleMaterial",0,0,material->density);
+        medModule = new TGeoMedium("PixelModuleMedium",1,matModule);
+        hasModuleMat = true;
+     }
+     if(material->name=="DefaultPixelRingMaterial"){
+        matRing = new TGeoMaterial("PixelRingMaterial",0,0,material->density);
+        medRing = new TGeoMedium("PixelRingMedium",2,matRing);
+	hasRingMat = true;
+     }
+   }
+   TGeoMaterial *matVacuum = new TGeoMaterial("Vacuum", 0,0,0);  //default materials to use in case parser cannot gather specific materials
    TGeoMaterial *matAl = new TGeoMaterial("Al", 26.98,13,2.7);
    TGeoMedium *Vacuum = new TGeoMedium("Vacuum",1, matVacuum);
    TGeoMedium *Al = new TGeoMedium("Aluminium",2, matAl);
    TGeoMedium *Si = new TGeoMedium("Si",7,7,0,0,0,20,0.1000000E+11,0.212,0.1000000E-02,1.150551);
-
-	string pixelendcapsname = "PixelEndcaps";
-	TGeoVolume *pixel_endcaps = new TGeoVolumeAssembly(pixelendcapsname.c_str());
-
+	
+        //Create assemlblies for inner and outer
+	string innerPixelEndcapsName = "InnerPixelEndcaps";
+	TGeoVolume *innerPixelEndcaps = new TGeoVolumeAssembly(innerPixelEndcapsName.c_str());
+	string PixelEndcapsName = "PixelEndcaps";
+        TGeoVolume *PixelEndcaps = new TGeoVolumeAssembly(PixelEndcapsName.c_str());
+	
 
 //Build Layers for discs
 	std::vector< EndcapLayerTmp *> layers = reader.getPixelEndcapLayers();
@@ -48,7 +69,7 @@ bool ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
 			string modType = layer->modtype[0];
 			double totalRingThickness = layer->thickness[0];
 			
-			if(layer->innerRadius[1]==0){
+			if(layer->innerRadius[1]==0){      //determines if using vectors or single values
 				innerradius=layer->innerRadius[0];
 			}
 			else{
@@ -71,7 +92,7 @@ bool ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
 				totalRingThickness=layer->thickness[iR];
 
 			string halfringname = "EndcapHalfRingSupport";
-			TGeoVolume *ring_obj = geom->MakeTubs(halfringname.c_str(),Al,innerradius,outerradius,layer->zoffset[0],-1*PI*degree/2,PI*degree/2);
+			TGeoVolume *ring_obj = geom->MakeTubs(halfringname.c_str(),medRing,innerradius,outerradius,layer->zoffset[0],-1*PI*degree/2,PI*degree/2);
 			ring_obj->SetLineColor(kBlack);
 			ring_obj->SetTransparency(65);	
 						
@@ -95,7 +116,7 @@ bool ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
 
 			//Build Sectors
 			for(int iS = 0; iS<nSectors/2;++iS){
-				TGeoVolume *sect_obj = geom->MakeTubs(modType.c_str(),Al,innerradius,outerradius,totalRingThickness-layer->zoffset[0],(-1*PI*degree)/2+iS*angleSector,(-1*PI*degree)/2+iS*angleSector+angleSector);
+				TGeoVolume *sect_obj = geom->MakeTubs(modType.c_str(),medModule,innerradius,outerradius,totalRingThickness-layer->zoffset[0],(-1*PI*degree)/2+iS*angleSector,(-1*PI*degree)/2+iS*angleSector+angleSector);
 				sect_obj->SetLineColor(4);
 				sect_obj->SetTransparency(60);
 				//if(layer->double_sided)	//needs to be tested with an xml file that has double sided endcaps
@@ -110,7 +131,7 @@ bool ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
 			//------adds rings to assemblies
 			assembly_rings->AddNode(ring_obj,iR+1,new TGeoCombiTrans(0,0,ringposition+(layer->splitOffSet/2),0));
 			assembly_rings->AddNode(ring_obj,iR+1,new TGeoCombiTrans(0,0,ringposition-(layer->splitOffSet/2),rot));//halfrings are shifted away to make room for services
-			if(complexity==0||complexity==2){
+			if(complexity!=1){
                         assembly_rings->AddNode(ring_obj,iR+1+nRings,new TGeoCombiTrans(0,0,-ringposition+(layer->splitOffSet/2),0));//not sure which side is shifted in which direction right now its arbitrary
                         assembly_rings->AddNode(ring_obj,iR+1+nRings,new TGeoCombiTrans(0,0,-ringposition-(layer->splitOffSet/2),rot));
                        	//^^^^adds the other side of the detector as a mirror provided the user set complexity at an appropriate value
@@ -119,21 +140,14 @@ bool ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
 			assembly_layer->AddNode(assembly_rings,iR+1,new TGeoTranslation(0,0,0));
 			
 		}
-
-		pixel_endcaps->AddNode(assembly_layer, i+1, new TGeoTranslation(0,0,0));
+		//puts the layers in the correct inner or full assembly
+		if(i<2) innerPixelEndcaps->AddNode(assembly_layer, i+1, new TGeoTranslation(0,0,0));
+		PixelEndcaps->AddNode(assembly_layer, i+1, new TGeoTranslation(0,0,0));
 			
 	}
 
-	//TGeoVolume *pixel_cover = geom->MakeTube("PixelDetectorShell",Al,0,layers.at(layers.size()-1)->outerRadius[0]+10,3000+10);
-	//values of 10 mm added as placeholder till shell geometry is determined
-	//pixel_cover->SetLineColor(kYellow);
-	//pixel_cover->SetTransparency(70);
-
-//	top->AddNode(pixel_cover,1,new TGeoTranslation(0,0,0));
-	top->AddNode(pixel_endcaps,1,new TGeoTranslation(0,0,0));
- 
-	
-
+   innerDetector->AddNode(innerPixelEndcaps,1,new TGeoTranslation(0,0,0));
+   fullDetector->AddNode(PixelEndcaps,1,new TGeoTranslation(0,0,0));
    return true;
 } 
 

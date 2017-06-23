@@ -68,6 +68,7 @@ namespace InDet {
     std::vector< BarrelLayerTmp *> getPixelBarrelLayers() const;
     std::vector< EndcapLayerTmp *> getPixelEndcapLayers() const;
     std::vector<SimpleServiceTubeTmp *> getPixelSimpleServiceTubeTemplates()const;
+    std::vector< MaterialTmp *> getMaterials() const;
 
      // Stave building helpers
     double getHalfPlainLength(InDet::StaveTmp *staveTmp) const;

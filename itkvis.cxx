@@ -62,7 +62,8 @@ int argComplexity = 0;
                 }
         }
 
-
+        
+	
         string infile("-");
         string style("0");
 
@@ -97,6 +98,8 @@ int argComplexity = 0;
 //--- Definition of a simple geometry
    gSystem->Load("libGeom");
    TGeoManager *geom = new TGeoManager("World of ITK", "Geometry of ITK");
+   geom->SetVisLevel(6); //makes it so that the geomanager will let you see up to 6 levels of daughters
+
    //--- define some materials
    TGeoMaterial *matVacuum = new TGeoMaterial("Vacuum", 0,0,0);
    TGeoMaterial *matAl = new TGeoMaterial("Al", 26.98,13,2.7);
@@ -109,7 +112,12 @@ int argComplexity = 0;
    top->SetTransparency(70);
    geom->SetTopVolume(top);
 
-
+   //--- make the inner container volume
+   TGeoVolume *innerDetector = new TGeoVolumeAssembly("InnerTwoLayers");
+   
+   //--- make the outer container volume
+   TGeoVolume *fullDetector = new TGeoVolumeAssembly("FullDetector");
+   
    TGeoMaterial *mat;
    TGeoMixture *mix;
    //---> create some materials
@@ -162,20 +170,24 @@ TGeoMedium *Ts = new TGeoMedium("Ts",12,12,0,0,0,20,0.1000000E+11,0.212,0.100000
    // display pixel barrel
    if(displayBarrelAndRings){
    ShowPixelBarrel *pixelBarrel = new ShowPixelBarrel();
-   pixelBarrel->process(reader,top, geom, argComplexity);
+   pixelBarrel->process(reader,top, innerDetector, fullDetector, geom, argComplexity);
    }
 	
    // display pixel endcap 
    if(displayEndcaps){
    ShowPixelEndcap *pixelEndcap = new ShowPixelEndcap();
-   pixelEndcap->process(reader,top, geom,argComplexity);
+   pixelEndcap->process(reader,top, innerDetector, fullDetector, geom, argComplexity);
    }
 
     //display pixel simple services
     if(displaySimpleServices){ 
     ShowPixelSimpleService *pixelSimpleService = new ShowPixelSimpleService();
-    pixelSimpleService->process(reader,top, geom,argComplexity);
+    pixelSimpleService->process(reader,top, innerDetector, fullDetector, geom, argComplexity);
     }
+
+   //add the inner assembly to the total volume if complexity is set to 3 otherwise add the whole detector
+   if(argComplexity==3) top->AddNode(innerDetector,1,new TGeoTranslation(0,0,0));
+   else top->AddNode(fullDetector,1,new TGeoTranslation(0,0,0));
 
    // beam pipe
    if(displayBeamPipe){
@@ -191,7 +203,7 @@ TGeoMedium *Ts = new TGeoMedium("Ts",12,12,0,0,0,20,0.1000000E+11,0.212,0.100000
    TEveManager::Create();
    TGeoNode* node = gGeoManager->GetTopNode();
    TEveGeoTopNode* en = new TEveGeoTopNode(gGeoManager, node);
-   en->SetVisLevel(4);
+   en->SetVisLevel(6);
    en->GetNode()->GetVolume()->SetVisibility(kFALSE);
    gEve->AddGlobalElement(en);
    TGLViewer *v = gEve->GetDefaultGLViewer();

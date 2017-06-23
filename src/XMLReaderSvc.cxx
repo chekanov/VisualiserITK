@@ -51,6 +51,7 @@ bool InDet::XMLReaderSvc::initialize()
   ATH_MSG_INFO("Reading Material templates");
   parseFile(m_xml_materials.c_str(),"Materials","Component");
   parseFile(m_xml_materials.c_str(),"Materials","Material");
+ // parseFile(m_xml_materials.c_str(),"PixelMaterials","MaterialWeight");
  // WARNING: read front-end chips BEFORE modules
   ATH_MSG_INFO("\n ======= Reading pixel FrontEndChip templates =======");
   parseFile(m_xml_pixmodules.c_str(),"PixelModules","FrontEndChip");
@@ -64,9 +65,6 @@ bool InDet::XMLReaderSvc::initialize()
   parseFile(m_xml_pixEndcapLayers.c_str(),"PixelEndcapLayers","PixelEndcapRing");
   parseFile(m_xml_pixEndcapLayers.c_str(),"PixelEndcapLayers","PixelEndcapDisc");
   parseFile(m_xml_SimpleServices.c_str(),"PixelServices","SimpleService");
- // parseFile(m_xml_EndcapDiskSupports.c_str(),"PixelRingSupports","PixelRingSupport");
- // parseFile(m_xml_EndcapDiskSupports.c_str(),"PixelRingSupports","PixelRingSupportGeo");
- // parseFile(m_xml_EndcapDiskSupports.c_str(),"PixelRingSupports","PixelLayerSupport");
   parseFile(m_xml_EndcapDiskSupports.c_str(),"PixelRingSupports","PixelLayerSupportGeo");
 
 
@@ -107,9 +105,10 @@ void InDet::XMLReaderSvc::parseNode(std::string section, DOMNode *node)
 {
  
    if(section.find("Material")              != std::string::npos) parseMaterialXML(node);
-//  else if(section.find("Component")        != std::string::npos) parseComponentXML(node);
+  // else if(section.find("Component")        != std::string::npos) parseComponentXML(node);
+  // else if(section.find("MaterialWeight")   != std::string::npos) parseMaterialXML(node);
    else if(section.find("FrontEndChip")     != std::string::npos) parseChipXML(node);
-   else if(section.find("SimpleService")     != std::string::npos) parseSimpleServiceXML(node);
+   else if(section.find("SimpleService")    != std::string::npos) parseSimpleServiceXML(node);
    else if(section.find("Module")           != std::string::npos) parseModuleXML(node);
    else if(section.find("PixelStave")       != std::string::npos) parseStaveXML(node,m_tmp_pixStave);
    else if(section.find("PixelBarrelLayer") != std::string::npos) parseBarrelLayerXML(node,m_tmp_pixBarrelLayer);
@@ -387,9 +386,9 @@ void InDet::XMLReaderSvc::parseSimpleServiceXML(DOMNode* node)
   const XMLSize_t nodeCount = list->getLength();
 
   // Create XML 16 bit strings
-  XMLCh* TAG_name      = transcode("NAME");
-  XMLCh* TAG_rmin    = transcode("RMIN");
-  XMLCh* TAG_rmax     = transcode("RMAX");
+  XMLCh* TAG_name = transcode("NAME");
+  XMLCh* TAG_rmin = transcode("RMIN");
+  XMLCh* TAG_rmax = transcode("RMAX");
   XMLCh* TAG_zmin = transcode("ZMIN");
   XMLCh* TAG_zmax = transcode("ZMAX");
    
@@ -901,8 +900,8 @@ std::vector< EndcapLayerTmp *> InDet::XMLReaderSvc::getPixelEndcapLayers() const
 {
 
   std::vector< EndcapLayerTmp *> layers;
-  // Get staves from template list
-    unsigned int n = m_tmp_pixEndcapLayer.size();	//changed from m_tmp_pixBarrelLayer.size();
+  
+    unsigned int n = m_tmp_pixEndcapLayer.size();	
      for(unsigned int is=0;is<n;is++){
           EndcapLayerTmp *layer = m_tmp_pixEndcapLayer.at(is);
               layers.push_back(layer);
@@ -910,6 +909,18 @@ std::vector< EndcapLayerTmp *> InDet::XMLReaderSvc::getPixelEndcapLayers() const
       return layers;
   }
 
+// get material templates (af)
+std::vector< MaterialTmp *> InDet::XMLReaderSvc::getMaterials() const
+{
+
+  std::vector< MaterialTmp *> materials;
+unsigned int n = m_tmp_material.size();
+     for(unsigned int is=0;is<n;is++){
+          MaterialTmp *material = m_tmp_material.at(is);
+             materials.push_back(material);
+     }
+      return materials;
+  }
 
 InDet::BarrelLayerTmp* InDet::XMLReaderSvc::getPixelBarrelLayerTemplate(unsigned int ilayer) const
 {
