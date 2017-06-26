@@ -229,7 +229,7 @@ namespace InDet {
 //SimpleService Template
  class SimpleServiceTubeTmp {
   public:
-    SimpleServiceTubeTmp() {  Rmin=0; Rmax = 0; Zmin = 0;Zmax=0; }
+    SimpleServiceTubeTmp() {  Rmin=0; Rmax = 0; Zmin = 0;Zmax=0;Thickness = 0; }
     ~SimpleServiceTubeTmp() {}
 
     inline void Print() {
@@ -240,7 +240,24 @@ namespace InDet {
     double Rmin;
     double Rmax;
     double Zmax;
-    double Zmin;	
+    double Zmin;
+    double Thickness;	
+  };
+
+//Encap Disk Supports
+ class EndcapDiskSupportTmp {
+  public:
+    EndcapDiskSupportTmp() {  rmin; rmax; thickness = 0; }
+    ~EndcapDiskSupportTmp() {}
+
+    inline void Print() {
+	std::cout<<"(debug) Disk Support name "<<name<<"rmin[0] and rmax[0] "<<rmin[0]<<"  "<<rmax[0]<<std::endl;
+    }
+
+    std::string name;
+    std::vector<double> rmin;
+    std::vector<double> rmax;
+    double thickness;
   };
 
   

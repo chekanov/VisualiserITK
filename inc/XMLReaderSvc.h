@@ -69,6 +69,7 @@ namespace InDet {
     std::vector< EndcapLayerTmp *> getPixelEndcapLayers() const;
     std::vector<SimpleServiceTubeTmp *> getPixelSimpleServiceTubeTemplates()const;
     std::vector< MaterialTmp *> getMaterials() const;
+    std::vector<EndcapDiskSupportTmp *> getPixelEndcapDiskSupportTemplates()const;
 
      // Stave building helpers
     double getHalfPlainLength(InDet::StaveTmp *staveTmp) const;
@@ -118,6 +119,7 @@ namespace InDet {
     std::vector< BarrelLayerTmp *> m_tmp_sctBarrelLayer;
     std::vector< EndcapLayerTmp *> m_tmp_sctEndcapLayer;
     std::vector< SimpleServiceTubeTmp *> m_tmp_SimpleService;
+    std::vector< EndcapDiskSupportTmp *> m_tmp_EndcapDiskSupport;
     bool m_doPix, m_doSCT, m_isGMX, m_createDict, m_readXMLfromDB;
   };
 }

@@ -24,7 +24,7 @@ InDet::XMLReaderSvc::XMLReaderSvc(const std::string& name) {
   m_xml_pixEndcapLayers=dir+"PixelEndcap.xml";
   m_xml_SimpleServices=dir+"PixelSimpleService.xml";
   m_xml_EndcapDiskSupports=dir+"PixelEndcapDiskSupports.xml"; 
-
+  
 
   cout << "  -> " << m_xml_materials << endl;
   cout << "  -> " <<  m_xml_pixStaves<< endl;
@@ -66,7 +66,7 @@ bool InDet::XMLReaderSvc::initialize()
   parseFile(m_xml_pixEndcapLayers.c_str(),"PixelEndcapLayers","PixelEndcapDisc");
   parseFile(m_xml_SimpleServices.c_str(),"PixelServices","SimpleService");
   parseFile(m_xml_EndcapDiskSupports.c_str(),"PixelRingSupports","PixelLayerSupportGeo");
-
+  parseFile(m_xml_EndcapDiskSupports.c_str(),"PixelRingSupports","PixelRingSupportGeo");
 
 
   if(!TerminateXML()) 
@@ -114,8 +114,8 @@ void InDet::XMLReaderSvc::parseNode(std::string section, DOMNode *node)
    else if(section.find("PixelBarrelLayer") != std::string::npos) parseBarrelLayerXML(node,m_tmp_pixBarrelLayer);
    else if(section.find("PixelEndcapRing" ) != std::string::npos) parseEndcapXML(node,m_tmp_pixEndcapLayer);
    else if(section.find("PixelEndcapDisc" ) != std::string::npos) parseEndcapXML(node,m_tmp_pixEndcapLayer);
-   else if(section.find("PixelRingSupport") != std::string::npos) parseEndcapDiskSupportXML(node);
-   else if(section.find("PixelLayerSupport") != std::string::npos) parseEndcapDiskSupportXML(node);
+  // else if(section.find("PixelRingSupport") != std::string::npos) parseEndcapDiskSupportXML(node);
+  // else if(section.find("PixelLayerSupport") != std::string::npos) parseEndcapDiskSupportXML(node);
    else if(section.find("PixelRingSupportGeo") != std::string::npos) parseEndcapDiskSupportXML(node);
    else if(section.find("PixelLayerSupportGeo") != std::string::npos) parseEndcapDiskSupportXML(node);
 //  else if(section.find("SCTStave")         != std::string::npos) parseStaveXML(node,m_tmp_sctStave);
@@ -436,36 +436,54 @@ void InDet::XMLReaderSvc::parseEndcapDiskSupportXML(DOMNode* node)
   XMLCh* TAG_layer = transcode("Layer");
 
 
-
-   
+  EndcapDiskSupportTmp *endcapDiskSupport = new EndcapDiskSupportTmp;
   SimpleServiceTubeTmp *endcapLayerSupport = new SimpleServiceTubeTmp;
         for( XMLSize_t xx = 0; xx < nodeCount; ++xx ) {
                 DOMNode* currentNode = list->item(xx);
                 if(currentNode->getNodeType() != DOMNode::ELEMENT_NODE) continue; //not an element
   
   DOMElement* currentElement = dynamic_cast< xercesc::DOMElement* >( currentNode );
-
-        if( XMLString::equals(currentElement->getTagName(), TAG_name))      endcapLayerSupport->Name = getString(currentNode);
-        else if( XMLString::equals(currentElement->getTagName(), TAG_r)){
+	std::string str(getString(currentNode)); //used to determine the type of support
+	
+        if( XMLString::equals(currentElement->getTagName(), TAG_name) && str.substr(0,4)!="Ring")      endcapLayerSupport->Name = getString(currentNode);
+	if(endcapLayerSupport->Name!=""){
+        if( XMLString::equals(currentElement->getTagName(), TAG_r)){
 		 endcapLayerSupport->Rmin =getVectorDouble(currentNode)[0];
 		 endcapLayerSupport->Rmax =getVectorDouble(currentNode)[1];
         }
-	 //else if( XMLString::equals(currentElement->getTagName(), TAG_rmax)) endcapLayerSupport->Rmax = atof(getString(currentNode));
-        else if( XMLString::equals(currentElement->getTagName(), TAG_z)){
+	else if( XMLString::equals(currentElement->getTagName(), TAG_z)){
 		 endcapLayerSupport->Zmin = getVectorDouble(currentNode)[0];
 		 endcapLayerSupport->Zmax = getVectorDouble(currentNode)[1];
 		 }
-        //else if( XMLString::equals(currentElement->getTagName(), TAG_zmax)) endcapLayerSupport->Zmax = atof(getString(currentNode));
-	} //end loop on node elements
+	}//end section for disk layer supports
 
-	if((endcapLayerSupport->Name)!=0) {
+	//parse endcap disk supports
+	if( XMLString::equals(currentElement->getTagName(), TAG_name) && str.substr(0,4)=="Ring")      endcapDiskSupport->name = getString(currentNode);
+	if(endcapDiskSupport->name!=""){
+		std::cout<<" found nodes for disk supports"<<endl;
+	 if( XMLString::equals(currentElement->getTagName(), TAG_rmin)) endcapDiskSupport->rmin = getVectorDouble(currentNode);
+	 else if( XMLString::equals(currentElement->getTagName(), TAG_rmax)) endcapDiskSupport->rmax = getVectorDouble(currentNode);
+	 else if( XMLString::equals(currentElement->getTagName(), TAG_thickness)) endcapDiskSupport->thickness = atof(getString(currentNode));
+	}//end section for endcap Disk supports
+
+        } //end loop on node elements
+	
+
+	
+	if((endcapLayerSupport->Name)!="") {
                  m_tmp_SimpleService.push_back(endcapLayerSupport);
 
           endcapLayerSupport->Print();
-          cout<<"parsed endcap support info"<<endl;
-   }
-}
+	}
 
+	 if((endcapDiskSupport->name)!="") {
+                 m_tmp_EndcapDiskSupport.push_back(endcapDiskSupport);
+
+          endcapDiskSupport->Print();
+
+             
+	}
+}
 
 
 void InDet::XMLReaderSvc::parseEndcapXML(DOMNode* node, std::vector< InDet::EndcapLayerTmp *>& vtmp)
@@ -936,10 +954,10 @@ InDet::BarrelLayerTmp* InDet::XMLReaderSvc::getPixelBarrelLayerTemplate(unsigned
   return layer;
 }
 
+//simple service template is used for simple srvices as well as support structures similar to simple services(ie. endcap tube supports)
 std::vector<SimpleServiceTubeTmp *> InDet::XMLReaderSvc::getPixelSimpleServiceTubeTemplates() const
 {
- // Get material template from list
-   unsigned int n = m_tmp_SimpleService.size();
+    unsigned int n = m_tmp_SimpleService.size();
    std::vector< SimpleServiceTubeTmp *> simpleServices;
 
      for(unsigned int i=0;i<n;i++) {
@@ -947,6 +965,22 @@ std::vector<SimpleServiceTubeTmp *> InDet::XMLReaderSvc::getPixelSimpleServiceTu
                      simpleServices.push_back( SimpleServiceTube);
      }
 	return simpleServices;
+
+                    }
+
+//endcap disk supports getter
+std::vector<EndcapDiskSupportTmp *> InDet::XMLReaderSvc::getPixelEndcapDiskSupportTemplates() const
+{
+    unsigned int n = m_tmp_EndcapDiskSupport.size();
+   std::vector< EndcapDiskSupportTmp *> diskSupports;
+	
+	cout<<"Getting Endcap Disk Support Templates"<<endl;	
+
+     for(unsigned int i=0;i<n;i++) {
+        EndcapDiskSupportTmp *endcapDiskSupport = m_tmp_EndcapDiskSupport.at(i);
+                     diskSupports.push_back( endcapDiskSupport);
+     }
+        return diskSupports;
 
                     }
 

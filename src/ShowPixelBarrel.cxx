@@ -39,7 +39,7 @@ bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
         medStave = new TGeoMedium("PixelStaveMedium",2,matStave);
      }
    }  
-
+   //Decalare Some assemblies to hold volumes, inner is used for complexity 3(inner 2 layer)
    string innerPixelBarrelName = "InnerPixelBarrel";
    TGeoVolume *innerPixelBarrel = new TGeoVolumeAssembly(innerPixelBarrelName.c_str());
    string PixelBarrelName = "PixelBarrel";
@@ -133,9 +133,8 @@ bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
      //add Barrel ring modules
      for(int irmod=0;irmod<rmodule_pos.size();irmod++){
 	TGeoVolume * rmodule_obj =  geom->MakeBox(rmodule_name.c_str(),medModule,rmodule_thickness,0.5*rmodule_width,0.5*rmodule_length);
-        rmodule_obj->SetLineColor(80);
-        rmodule_obj->SetFillColor(80);
-        rmodule_obj->SetTransparency(70);
+        rmodule_obj->SetLineColor(kTeal+3);
+        rmodule_obj->SetTransparency(65);
 	
 	TGeoRotation *ringRot = new TGeoRotation;
 	ringRot->RotateY(-rmodule_angle*degree);
@@ -144,7 +143,8 @@ bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
 
 
 	assembly_barrelring->AddNode(rmodule_obj,irmod+1,new TGeoCombiTrans(0,0,rmodule_pos[irmod],ringRot));
-	if(complexity!=1){ //only displays half the detector if the complexity is set to 1
+	if(complexity!=1){
+	//only displays half the detector if the complexity is set to 1
 	assembly_barrelring->AddNode(rmodule_obj,irmod+1,new TGeoCombiTrans(0,0,-rmodule_pos[irmod],ringRotFlipped));
 	}
 
@@ -169,7 +169,7 @@ bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
       cout << " -> Module name=" << module_name << " Chip=" << module_chip << " length=" << module_length << " mm  width=" << module_width << " mm" << endl;
 
 
-// add modules
+// add modules if complexity is set to show them
       if(complexity!=2){
       int nmodplain = stave->b_modn;
       int nmodtrans = 2*stave->trans_pos.size();
