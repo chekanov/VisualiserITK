@@ -44,7 +44,7 @@ class ShowPixelBarrel {
 
     virtual ~ShowPixelBarrel(){};
 
-    bool process(InDet::XMLReaderSvc& reader, TGeoVolume* top,TGeoVolume* innerDetector, TGeoVolume* outerDetector, TGeoManager *geom,int complexity);
+    vector<double> process(InDet::XMLReaderSvc& reader, TGeoVolume* top,TGeoVolume* innerDetector, TGeoVolume* outerDetector, TGeoManager *geom, int complexity);
 
 };
 

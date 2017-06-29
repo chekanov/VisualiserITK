@@ -50,7 +50,11 @@ bool displayBarrelAndRings = true;
 bool displaySimpleServices = true;
 bool displayBeamPipe = true;
 int argComplexity = 0;
-
+vector <double> siAreaEndcaps;
+vector <double> siAreaBarrel;
+double totalSiAreaEndcaps = 0;
+double totalSiAreaBarrel = 0;
+double totalSiArea = 0;
 // Look for a help argument
         for (int i = 1; i < argc; ++i) {
                 const string arg = argv[i];
@@ -170,13 +174,13 @@ TGeoMedium *Ts = new TGeoMedium("Ts",12,12,0,0,0,20,0.1000000E+11,0.212,0.100000
    // display pixel barrel
    if(displayBarrelAndRings){
    ShowPixelBarrel *pixelBarrel = new ShowPixelBarrel();
-   pixelBarrel->process(reader,top, innerDetector, fullDetector, geom, argComplexity);
+   siAreaBarrel = pixelBarrel->process(reader,top, innerDetector, fullDetector, geom, argComplexity);
    }
 	
    // display pixel endcap 
    if(displayEndcaps){
    ShowPixelEndcap *pixelEndcap = new ShowPixelEndcap();
-   pixelEndcap->process(reader,top, innerDetector, fullDetector, geom, argComplexity);
+   siAreaEndcaps = pixelEndcap->process(reader,top, innerDetector, fullDetector, geom, argComplexity);
    }
 
     //display pixel simple services
@@ -185,6 +189,8 @@ TGeoMedium *Ts = new TGeoMedium("Ts",12,12,0,0,0,20,0.1000000E+11,0.212,0.100000
     pixelSimpleService->process(reader,top, innerDetector, fullDetector, geom, argComplexity);
     }
 
+
+ 	
    //add the inner assembly to the total volume if complexity is set to 3 otherwise add the whole detector
    if(argComplexity==3) top->AddNode(innerDetector,1,new TGeoTranslation(0,0,0));
    else top->AddNode(fullDetector,1,new TGeoTranslation(0,0,0));
@@ -214,13 +220,37 @@ TGeoMedium *Ts = new TGeoMedium("Ts",12,12,0,0,0,20,0.1000000E+11,0.212,0.100000
    gEve->Redraw3D(kTRUE);
    en->ExpandIntoListTreesRecursively();
 
+   //siArea info 
+   std::ofstream ofsSiArea;
+   string out="out/"+infile+"_siArea_"+style+".txt";
+   ofsSiArea.open(out);
 
+   for(int iB = 0; iB<siAreaBarrel.size();iB++){
+     cout<<"Silicon area in layer: "<<iB<<" of the Barrel and Rings assembly has: "<<siAreaBarrel[iB]<<"  mm^2 si"<<endl;
+     ofsSiArea<<"Silicon area in layer: "<<iB<<" of the Barrel and Rings assembly has: "<<siAreaBarrel[iB]<<"  mm^2 si"<<endl;
+     totalSiAreaBarrel += siAreaBarrel[iB];
+   }
+   cout<<"Area of Silicon in Barrel:                                    "<<totalSiAreaBarrel<<" mm^2"<<endl;
+   ofsSiArea<<"Area of Silicon in Barrel:                                    "<<totalSiAreaBarrel<<" mm^2"<<endl;
+
+   for(int iE = 0; iE<siAreaEndcaps.size();iE++){
+     cout<<"Silicon area in layer: "<<iE<<" of the Endcaps assembly has:         "<<siAreaEndcaps[iE]<<"  mm^2 si"<<endl;
+     ofsSiArea<<"Silicon area in layer: "<<iE<<" of the Endcaps assembly has:         "<<siAreaEndcaps[iE]<<"  mm^2 si"<<endl;
+     totalSiAreaEndcaps += siAreaEndcaps[iE];
+   }
+   cout<<"Area of Silicon in Endcaps:                                   "<<totalSiAreaEndcaps<<" mm^2"<<endl;
+   ofsSiArea<<"Area of Silicon in Endcaps:                                   "<<totalSiAreaEndcaps<<" mm^2"<<endl;
+   totalSiArea = totalSiAreaEndcaps + totalSiAreaBarrel;
+   cout<<"Area of Silicon in total:                                     "<<totalSiArea<<" mm^2"<<endl;
+   ofsSiArea<<"Area of Silicon in total:                                     "<<totalSiArea<<" mm^2"<<endl;
+
+   ofsSiArea.close();
 
    // look at TOP level
    TGeoVolume* itktop = gGeoManager->GetTopVolume();
    itktop->SetVisibility(kFALSE); // hide TGeoBBox shape in top volume
 
-   string out="out/"+infile+"_"+style+".root";
+   out="out/"+infile+"_"+style+".root";
    cout << "Write file: " << out << endl;
    TFile* f = TFile::Open(out.c_str(),"recreate");
    itktop->Write("topvolume");
@@ -243,9 +273,10 @@ TGeoMedium *Ts = new TGeoMedium("Ts",12,12,0,0,0,20,0.1000000E+11,0.212,0.100000
 
    out="out/"+infile+"_"+style+".gdml";
    cout << "Write file: " << out << endl;
-   // gGeoManager->SaveAs(out.c_str());
+   gGeoManager->SaveAs(out.c_str());
    gGeoManager->Export(out.c_str());
 
+   
 
   theApp.Run();
   return 0;

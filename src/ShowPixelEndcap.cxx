@@ -6,8 +6,9 @@
 #include <cmath>
 
 // implementation of the endcap drawing
-bool ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeoVolume* innerDetector, TGeoVolume* fullDetector, TGeoManager* geom,int complexity)
+vector<double> ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeoVolume* innerDetector, TGeoVolume* fullDetector, TGeoManager* geom, int complexity)
 {
+   vector<double> siAreas;
 
    // define some constants
    const double degree=57.2958;
@@ -53,12 +54,15 @@ bool ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
 	std::vector< EndcapLayerTmp *> layers = reader.getPixelEndcapLayers();
 	cout<<"about to get Disk supports"<<endl;
 	std::vector<EndcapDiskSupportTmp *> diskSupports = reader.getPixelEndcapDiskSupportTemplates();
+	
+	unsigned int nlayers = layers.size();
+	if(complexity == 3 && nlayers>2) nlayers = 2;
 
-	for(unsigned int i=0; i<layers.size();i++) {
+	for(unsigned int i=0; i<nlayers;i++) {
+		double siArea = 0;
+
 		EndcapLayerTmp *layer = layers.at(i);
 		EndcapDiskSupportTmp *support;
-		//if(complexity==3) support = diskSupports.at(3-i);
-		//else 
 		support = diskSupports.at(3-i);
 		cout<<"number of disk supports: "<<diskSupports.size()<<endl;
      		string layername="EndcapLayerAssembly"; 
@@ -97,7 +101,7 @@ bool ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
 			if(support->rmin[1]<=1||support->rmin[1]>3000000) supportInnerRadius=support->rmin[0]; //something really weird happens here where the rmin and rmax become absurd numbers, returning an address???
 			if(support->rmax[1]<=1||support->rmax[1]>3000000) supportOuterRadius=support->rmax[0];
 			
-			cout<<"Disk Support info"<<supportInnerRadius<<"  "<<supportOuterRadius<<" "<<endl;	
+			cout<<"Disk Support number/inner radius / outer radius"<<iR<<" / "<<supportInnerRadius<<" / "<<supportOuterRadius<<endl;	
 			string halfringname = "EndcapHalfRingSupport";
 			TGeoVolume *ring_obj = geom->MakeTubs(halfringname.c_str(),medRing,supportInnerRadius,supportOuterRadius,supportThickness,-1*PI*degree/2,PI*degree/2);
 			ring_obj->SetLineColor(kBlack);
@@ -109,39 +113,69 @@ bool ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
 					
 			//-------------Sectors added here
 			if(complexity!=2){
-			int nSectors;
+			int nSectors;  
 			double angleSector;
+			
 			if(layer->nsectors[1]==0){
 				nSectors = layer->nsectors[0];
+				 if (nSectors % 4 !=0) nSectors+=2; //a quick fix to fix a rounding issue (the meaning of sectors is unclear)
 				angleSector =(PI2*degree)/nSectors;
 
 			}
 			else{
 				nSectors = layer->nsectors[iR];
+				if (nSectors % 4 !=0) nSectors+=2; //a quick fix to fix a rounding issue (the meaning of sectors is unclear)
 				angleSector =(PI2*degree)/nSectors;	//the arc angle taken up by each sector
 			}
-
+			
 			//Build Sectors(areas that hold modules)
-			for(int iS = 0; iS<nSectors/2;++iS){
-				TGeoVolume *sect_obj = geom->MakeTubs(modType.c_str(),medModule,innerradius,outerradius,totalRingThickness-layer->zoffset[0],(-1*PI*degree)/2+iS*angleSector,(-1*PI*degree)/2+iS*angleSector+angleSector);
-				sect_obj->SetLineColor(4);
-				sect_obj->SetTransparency(60);
-				//add sectors to the rings
-				ring_obj->AddNode(sect_obj,iS+1,new TGeoTranslation(0,0,layer->zoffset[0]));
-				ring_obj->AddNode(sect_obj,iS+1,new TGeoTranslation(0,0,-layer->zoffset[0]));
-			}//end loop over sectors
+			for(int iS = 0; iS<nSectors/4;++iS){
+				ModuleTmp *moduleTmp = reader.getModuleTemplate(modType);
+				double phiOfMod0 = layer->phioffset[0];
+                                if(phiOfMod0 == 0) phiOfMod0 = PI/2;
+				double ringModuleAngle =iS * angleSector * 2 - (degree * phiOfMod0)+angleSector;
+				double ringModuleRadius = innerradius + moduleTmp->length/2;
+				double xPos = ringModuleRadius * cos(ringModuleAngle/degree);
+				double yPos = ringModuleRadius * sin(ringModuleAngle/degree);
+				double xPosShift = ringModuleRadius * cos((ringModuleAngle+angleSector)/degree);
+				double yPosShift = ringModuleRadius * sin((ringModuleAngle+angleSector)/degree);
+				double nChips = 0;
+                                double areaChips = 0;
+				
+				cout<<"ring module angle: "<<ringModuleAngle<<" half angle between modules: "<<angleSector<<endl;
+				TGeoRotation *rotModule = new TGeoRotation();
+				rotModule->RotateZ(ringModuleAngle);
+				TGeoRotation *rotModuleDoubleSided = new TGeoRotation();
+				rotModuleDoubleSided->RotateZ(ringModuleAngle + angleSector);
+
+				TGeoVolume *module = geom->MakeBox(modType.c_str(),medModule,moduleTmp->widthmax / 2, moduleTmp->length / 2, moduleTmp->thickness / 2);
+				module->SetLineColor(4);
+				module->SetTransparency(60);
+				
+				//add modules to the rings
+				ring_obj->AddNode(module,iS+1,new TGeoCombiTrans(xPos, yPos, (layer->zoffset[0]),rotModule));
+				 //can be updated to allow for varying zoffsets among rings
+				ring_obj->AddNode(module,iS+1,new TGeoCombiTrans(xPosShift, yPosShift, -(layer->zoffset[0]),rotModuleDoubleSided));
+
+				nChips = moduleTmp->lengthChips * moduleTmp->widthMaxChips * 4; //because each half ring is half a ring and is double sided
+				if(complexity != 1) nChips = nChips * 2; //the second half of the detector (-z region)
+      				areaChips = reader.getChipTemplate(moduleTmp->chip_type)->length * reader.getChipTemplate(moduleTmp->chip_type)->width;
+        			siArea += (areaChips * nChips);
+				}//end loop over Modules
 			}
 			
 			
 
 			//------adds rings to assemblies
-			assembly_rings->AddNode(ring_obj,iR+1,new TGeoCombiTrans(0,0,ringposition+(layer->splitOffSet/2),0));
-			assembly_rings->AddNode(ring_obj,iR+1,new TGeoCombiTrans(0,0,ringposition-(layer->splitOffSet/2),rot));
-			//halfrings are shifted away to make room for services
-			if(complexity!=1){
-                        assembly_rings->AddNode(ring_obj,iR+1+nRings,new TGeoCombiTrans(0,0,-ringposition+(layer->splitOffSet/2),0));
+			assembly_rings->AddNode(ring_obj,iR+1,new TGeoCombiTrans(0,0,ringposition+(layer->splitOffSet),0));
+			assembly_rings->AddNode(ring_obj,iR+1,new TGeoCombiTrans(0,0,ringposition-(layer->splitOffSet),rot));
+			//halfrings are shifted away to make room for servicies
+
+			//add the second half of the detector in the -z area
+			if(complexity!=1){ 
+                        assembly_rings->AddNode(ring_obj,iR+1+nRings,new TGeoCombiTrans(0,0,-ringposition+(layer->splitOffSet),0));
 			//not sure which side is shifted in which direction right now its arbitrary
-                        assembly_rings->AddNode(ring_obj,iR+1+nRings,new TGeoCombiTrans(0,0,-ringposition-(layer->splitOffSet/2),rot));
+                        assembly_rings->AddNode(ring_obj,iR+1+nRings,new TGeoCombiTrans(0,0,-ringposition-(layer->splitOffSet),rot));
                        	//^^^^adds the other side of the detector as a mirror provided the user set complexity at an appropriate value
                         }
 
@@ -153,12 +187,13 @@ bool ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
 		if(i<2) innerPixelEndcaps->AddNode(assembly_layer, i+1, new TGeoTranslation(0,0,0));
 		PixelEndcaps->AddNode(assembly_layer, i+1, new TGeoTranslation(0,0,0));
 			
+   		siAreas.push_back(siArea);
 	}//end loop over layers
 
    //add the Endcap assemblies to the inner or outer detector to be used in itkvis.cxx
    innerDetector->AddNode(innerPixelEndcaps,1,new TGeoTranslation(0,0,0));
    fullDetector->AddNode(PixelEndcaps,1,new TGeoTranslation(0,0,0));
-   return true;
+   return siAreas;
 } 
 
 

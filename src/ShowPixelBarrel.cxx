@@ -4,10 +4,10 @@
 */
 #include "ShowPixelBarrel.h"
 
-bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeoVolume* innerDetector, TGeoVolume* fullDetector, TGeoManager* geom,int complexity)
+vector<double> ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeoVolume* innerDetector, TGeoVolume* fullDetector, TGeoManager* geom, int complexity)
 {
 
-
+   vector<double> siAreas;
 
    // define some constants
    const float degree=57.2958;
@@ -53,11 +53,15 @@ bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
 
     // look at layers and build them
     std::vector< BarrelLayerTmp *> layers = reader.getPixelBarrelLayers();
-    for(unsigned int i=0; i<layers.size();i++) {
+    unsigned int nlayers = layers.size();
+    if(complexity == 3 && nlayers>2) nlayers = 2;
+
+    for(unsigned int i=0; i<nlayers;i++) {
       BarrelLayerTmp *layer = layers.at(i);
       string layername="LayerAssembly"; // +string(layer->name);
       TGeoVolume *assembly_layer = new TGeoVolumeAssembly(layername.c_str());
       double layer_radius=layer->radius;
+      double siArea = 0;      
 	
       string ringLayerName="RingLayerAssembly"; // +string(layer->name);
       TGeoVolume *ringLayer_Assembly = new TGeoVolumeAssembly(ringLayerName.c_str());
@@ -119,19 +123,27 @@ bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
      //stave "mountain" modules aka. barrel ring modules
      if(stave_type.compare("Alpine")==0&&complexity!=2){
 	cout<<"about to read alpine module templates stavetype: "<<stave_type<<endl;
-     InDet::ModuleTmp* ringModule = reader.getModuleTemplate(stave->alp_type);
-     std::vector<double> rmodule_pos = stave->alp_pos;		
-     double rmodule_length = ringModule->length;
-     double rmodule_width  = ringModule->widthmax;
-     double rmodule_thickness  = ringModule->thickness;
-     string rmodule_name= ringModule->name;
-     string rmodule_chip =ringModule->chip_type;
-     double rmodule_angle = stave->alp_angle;
-     double rmodule_rshift = stave->alp_rshift;
-     cout << " ->Ring Module name=" << rmodule_name << " Chip=" << rmodule_chip << " length=" << rmodule_length << " mm  width=" << rmodule_width << " mm" << endl;
+        InDet::ModuleTmp* ringModule = reader.getModuleTemplate(stave->alp_type);
+        std::vector<double> rmodule_pos = stave->alp_pos;		
+        double rmodule_length = ringModule->length;
+        double rmodule_width  = ringModule->widthmax;
+        double rmodule_thickness  = ringModule->thickness;
+        string rmodule_name= ringModule->name;
+        string rmodule_chip =ringModule->chip_type;
+        double rmodule_angle = stave->alp_angle;
+        double rmodule_rshift = stave->alp_rshift;
+        cout << " ->Ring Module name=" << rmodule_name << " Chip=" << rmodule_chip << " length=" << rmodule_length << " mm  width=" << rmodule_width << " mm" << endl;
      
      //add Barrel ring modules
      for(int irmod=0;irmod<rmodule_pos.size();irmod++){
+	double nChips = 0;
+	double areaChips = 0;
+
+	nChips = ringModule->lengthChips * ringModule->widthMaxChips;
+	if(complexity != 1) nChips = nChips * 2;
+	areaChips = reader.getChipTemplate(rmodule_chip)->length * reader.getChipTemplate(rmodule_chip)->width;
+	siArea += (areaChips * nChips);
+
 	TGeoVolume * rmodule_obj =  geom->MakeBox(rmodule_name.c_str(),medModule,rmodule_thickness,0.5*rmodule_width,0.5*rmodule_length);
         rmodule_obj->SetLineColor(kTeal+3);
         rmodule_obj->SetTransparency(65);
@@ -140,7 +152,6 @@ bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
 	ringRot->RotateY(-rmodule_angle*degree);
 	TGeoRotation *ringRotFlipped = new TGeoRotation;
         ringRotFlipped->RotateY(rmodule_angle*degree);
-
 
 	assembly_barrelring->AddNode(rmodule_obj,irmod+1,new TGeoCombiTrans(0,0,rmodule_pos[irmod],ringRot));
 	if(complexity!=1){
@@ -174,8 +185,16 @@ bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
       int nmodplain = stave->b_modn;
       int nmodtrans = 2*stave->trans_pos.size();
       int NMOD = nmodtrans + nmodplain;
-      // add modules 
+      // add modules
+      
       for (int imod=0; imod<NMOD; imod++) {
+	double nChips = 0;
+        double areaChips = 0;
+
+        nChips += plainModule->lengthChips * plainModule->widthMaxChips;
+        areaChips = reader.getChipTemplate(plainModule->chip_type)->length * reader.getChipTemplate(plainModule->chip_type)->width;
+        siArea += areaChips * nChips;
+
         TGeoVolume * module_obj =  geom->MakeBox(module_name.c_str(),medModule,module_thickness,0.5*module_width,0.5*module_length);
         module_obj->SetLineColor(80);
         module_obj->SetFillColor(80);
@@ -231,7 +250,9 @@ bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
       if(i<2)innerPixelBarrel->AddNode(assembly_layer, i+1, new TGeoTranslation(0,0,0));
       PixelBarrel->AddNode(assembly_layer, i+1, new TGeoTranslation(0,0,0));
       if(i<2) innerPixelBarrelRings->AddNode(ringLayer_Assembly,i+1,new TGeoTranslation(0,0,0));
-      PixelBarrelRings->AddNode(ringLayer_Assembly,i+1,new TGeoTranslation(0,0,0));       
+      PixelBarrelRings->AddNode(ringLayer_Assembly,i+1,new TGeoTranslation(0,0,0));
+
+      siAreas.push_back(siArea);       
     }
 	//add the assemblies to the inner and full detector assemblies
    innerDetector->AddNode(innerPixelBarrel,1,new TGeoTranslation(0,0,0));
@@ -240,7 +261,7 @@ bool ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeo
    fullDetector->AddNode(PixelBarrelRings,1,new TGeoTranslation(0,0,0));
    
 
-   return true;
+   return siAreas;
 } 
 
 
