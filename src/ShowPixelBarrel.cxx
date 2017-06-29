@@ -4,10 +4,13 @@
 */
 #include "ShowPixelBarrel.h"
 
-vector<double> ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeoVolume* innerDetector, TGeoVolume* fullDetector, TGeoManager* geom, int complexity)
+vector<double> ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeoVolume* innerDetector, TGeoVolume* fullDetector, TGeoManager* geom, int complexity, string infile)
 {
 
    vector<double> siAreas;
+   vector<double> ntwoxoneModule;
+   vector<double> ntwoxtwoModule;
+   vector<double> nonexoneModule;
 
    // define some constants
    const float degree=57.2958;
@@ -60,9 +63,13 @@ vector<double> ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume*
       BarrelLayerTmp *layer = layers.at(i);
       string layername="LayerAssembly"; // +string(layer->name);
       TGeoVolume *assembly_layer = new TGeoVolumeAssembly(layername.c_str());
+
       double layer_radius=layer->radius;
       double siArea = 0;      
-	
+      double twoxoneModule = 0;
+      double twoxtwoModule =0;
+      double onexoneModule = 0;      
+
       string ringLayerName="RingLayerAssembly"; // +string(layer->name);
       TGeoVolume *ringLayer_Assembly = new TGeoVolumeAssembly(ringLayerName.c_str());
 
@@ -138,11 +145,25 @@ vector<double> ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume*
      for(int irmod=0;irmod<rmodule_pos.size();irmod++){
 	double nChips = 0;
 	double areaChips = 0;
-
+	
+	//siArea info and module counts
 	nChips = ringModule->lengthChips * ringModule->widthMaxChips;
-	if(complexity != 1) nChips = nChips * 2;
+
+	if(complexity != 1) {
+                 if(nChips == 1) onexoneModule+=2;
+                 if(nChips == 2) twoxoneModule+=2;
+                 if(nChips == 4) twoxtwoModule+=2;
+		 nChips = nChips * 2; //the second half of the detector (-z region)
+	}
+	else{
+                 if(nChips == 1) onexoneModule++;
+                 if(nChips == 2) twoxoneModule++;
+                 if(nChips == 4) twoxtwoModule++;
+	}
+
 	areaChips = reader.getChipTemplate(rmodule_chip)->length * reader.getChipTemplate(rmodule_chip)->width;
 	siArea += (areaChips * nChips);
+	//end siArea info section
 
 	TGeoVolume * rmodule_obj =  geom->MakeBox(rmodule_name.c_str(),medModule,rmodule_thickness,0.5*rmodule_width,0.5*rmodule_length);
         rmodule_obj->SetLineColor(kTeal+3);
@@ -191,7 +212,13 @@ vector<double> ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume*
 	double nChips = 0;
         double areaChips = 0;
 
-        nChips += plainModule->lengthChips * plainModule->widthMaxChips;
+	//siArea info and module counts
+        nChips = plainModule->lengthChips * plainModule->widthMaxChips;
+		
+	if(nChips == 1) onexoneModule++;
+        if(nChips == 2) twoxoneModule++;
+        if(nChips == 4) twoxtwoModule++;
+	
         areaChips = reader.getChipTemplate(plainModule->chip_type)->length * reader.getChipTemplate(plainModule->chip_type)->width;
         siArea += areaChips * nChips;
 
@@ -252,16 +279,50 @@ vector<double> ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume*
       if(i<2) innerPixelBarrelRings->AddNode(ringLayer_Assembly,i+1,new TGeoTranslation(0,0,0));
       PixelBarrelRings->AddNode(ringLayer_Assembly,i+1,new TGeoTranslation(0,0,0));
 
-      siAreas.push_back(siArea);       
+      siAreas.push_back(siArea);
+      nonexoneModule.push_back(onexoneModule);
+      ntwoxoneModule.push_back(twoxoneModule);
+      ntwoxtwoModule.push_back(twoxtwoModule);
+       
     }
 	//add the assemblies to the inner and full detector assemblies
    innerDetector->AddNode(innerPixelBarrel,1,new TGeoTranslation(0,0,0));
    innerDetector->AddNode(innerPixelBarrelRings,1,new TGeoTranslation(0,0,0));
    fullDetector->AddNode(PixelBarrel,1,new TGeoTranslation(0,0,0));
    fullDetector->AddNode(PixelBarrelRings,1,new TGeoTranslation(0,0,0));
-   
 
-   return siAreas;
+   //Si Area and module count file writing-----------------------
+	
+   ofstream ofsSiArea;
+   string style = to_string(complexity);
+   string out = "out/"+infile+"_SiArea_"+style+".txt";
+   double totonexoneModules = 0;
+   double tottwoxoneModules = 0;
+   double tottwoxtwoModules = 0;
+
+   ofsSiArea.open(out,ios::app);
+   ofsSiArea<<"Barrel and Barrel rings: "<<endl;
+   ofsSiArea<<"layer:    Number of 1x1 Modules:"<<endl;
+   for(int i = 0; i<nonexoneModule.size();i++){
+     ofsSiArea<<"    "<<i<<" has: "<<nonexoneModule[i]<<endl;
+     totonexoneModules+=nonexoneModule[i];
+   }
+
+   ofsSiArea<<"layer:    Number of 2x1 Modules:"<<endl;
+   for(int i = 0; i<ntwoxoneModule.size();i++){
+     ofsSiArea<<"    "<<i<<" has: "<<ntwoxoneModule[i]<<endl;
+     tottwoxoneModules+=ntwoxoneModule[i];
+   }
+
+   ofsSiArea<<"layer:    Number of 2x2 Modules:"<<endl;
+   for(int i = 0; i<ntwoxtwoModule.size();i++){
+     ofsSiArea<<"    "<<i<<" has: "<<ntwoxtwoModule[i]<<endl;
+     tottwoxtwoModules+=ntwoxtwoModule[i];
+   }
+  ofsSiArea<<"The Barrel has a total of: "<<totonexoneModules<<" 1x1 Modules, "<<tottwoxoneModules<<" 2x1 Modules, and "<<tottwoxtwoModules<<" 2x2 Modules"<<endl<<endl;
+  ofsSiArea.close();
+
+return siAreas;
 } 
 
 

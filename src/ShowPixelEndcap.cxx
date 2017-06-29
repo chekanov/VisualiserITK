@@ -4,11 +4,16 @@
  */
 #include "ShowPixelEndcap.h"
 #include <cmath>
+#include <iostream>
+#include <fstream> 
 
 // implementation of the endcap drawing
-vector<double> ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeoVolume* innerDetector, TGeoVolume* fullDetector, TGeoManager* geom, int complexity)
+vector<double> ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeoVolume* innerDetector, TGeoVolume* fullDetector, TGeoManager* geom, int complexity,string infile)
 {
    vector<double> siAreas;
+   vector<double> ntwoxoneModule;
+   vector<double> ntwoxtwoModule;
+   vector<double> nonexoneModule;
 
    // define some constants
    const double degree=57.2958;
@@ -41,7 +46,7 @@ vector<double> ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume*
    TGeoMaterial *matAl = new TGeoMaterial("Al", 26.98,13,2.7);
    TGeoMedium *Vacuum = new TGeoMedium("Vacuum",1, matVacuum);
    TGeoMedium *Al = new TGeoMedium("Aluminium",2, matAl);
-   TGeoMedium *Si = new TGeoMedium("Si",7,7,0,0,0,20,0.1000000E+11,0.212,0.1000000E-02,1.150551);
+   TGeoMedium *Si = new TGeoMedium("Si",7,7,0,0,0,20,0.1000000,0.00002,0.1000000E-02,1.150551);
 	
         //Create assemlblies for inner and outer(inner is used for complexity 3)
 	string innerPixelEndcapsName = "InnerPixelEndcaps";
@@ -54,12 +59,15 @@ vector<double> ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume*
 	std::vector< EndcapLayerTmp *> layers = reader.getPixelEndcapLayers();
 	cout<<"about to get Disk supports"<<endl;
 	std::vector<EndcapDiskSupportTmp *> diskSupports = reader.getPixelEndcapDiskSupportTemplates();
-	
+
 	unsigned int nlayers = layers.size();
 	if(complexity == 3 && nlayers>2) nlayers = 2;
 
 	for(unsigned int i=0; i<nlayers;i++) {
 		double siArea = 0;
+		double twoxoneModule = 0;
+	        double twoxtwoModule =0;
+       		double onexoneModule = 0;
 
 		EndcapLayerTmp *layer = layers.at(i);
 		EndcapDiskSupportTmp *support;
@@ -83,7 +91,6 @@ vector<double> ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume*
 			double outerradius;
 			string modType = layer->modtype[0];
 			double totalRingThickness = layer->thickness[0];
-			
 			double supportInnerRadius = support->rmin[iR];
 			double supportOuterRadius = support->rmax[iR];
 			double supportThickness = support->thickness;
@@ -157,15 +164,35 @@ vector<double> ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume*
 				 //can be updated to allow for varying zoffsets among rings
 				ring_obj->AddNode(module,iS+1,new TGeoCombiTrans(xPosShift, yPosShift, -(layer->zoffset[0]),rotModuleDoubleSided));
 
-				nChips = moduleTmp->lengthChips * moduleTmp->widthMaxChips * 4; //because each half ring is half a ring and is double sided
-				if(complexity != 1) nChips = nChips * 2; //the second half of the detector (-z region)
+				nChips = moduleTmp->lengthChips * moduleTmp->widthMaxChips;
+								
+				//the number of modules is dependent on the number of times the halfring is copied
+				if(complexity != 1) {
+					if(nChips == 1) onexoneModule+=8;
+	                                if(nChips == 2) twoxoneModule+=8;
+        	                        if(nChips == 4) twoxtwoModule+=8;
+					nChips = nChips * 2; //the second half of the detector (-z region)
+					
+				}
+				else{
+					if(nChips == 1) onexoneModule+=4;
+                                        if(nChips == 2) twoxoneModule+=4;
+                                        if(nChips == 4) twoxtwoModule+=4;
+
+				}
+				
+				nChips = nChips *4;  //each half ring is half a ring and is double sided
+
       				areaChips = reader.getChipTemplate(moduleTmp->chip_type)->length * reader.getChipTemplate(moduleTmp->chip_type)->width;
         			siArea += (areaChips * nChips);
-				}//end loop over Modules
-			}
-			
+				
 			
 
+				}//end loop over Modules
+				
+				
+			}//end if complexity!=1
+			
 			//------adds rings to assemblies
 			assembly_rings->AddNode(ring_obj,iR+1,new TGeoCombiTrans(0,0,ringposition+(layer->splitOffSet),0));
 			assembly_rings->AddNode(ring_obj,iR+1,new TGeoCombiTrans(0,0,ringposition-(layer->splitOffSet),rot));
@@ -182,7 +209,11 @@ vector<double> ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume*
 			assembly_layer->AddNode(assembly_rings,iR+1,new TGeoTranslation(0,0,0));
 			
 		}//end loop over rings
-		
+	
+		 nonexoneModule.push_back(onexoneModule);
+                 ntwoxoneModule.push_back(twoxoneModule);
+                 ntwoxtwoModule.push_back(twoxtwoModule);
+	
 		//puts the layers in the correct inner or full assembly
 		if(i<2) innerPixelEndcaps->AddNode(assembly_layer, i+1, new TGeoTranslation(0,0,0));
 		PixelEndcaps->AddNode(assembly_layer, i+1, new TGeoTranslation(0,0,0));
@@ -193,7 +224,40 @@ vector<double> ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume*
    //add the Endcap assemblies to the inner or outer detector to be used in itkvis.cxx
    innerDetector->AddNode(innerPixelEndcaps,1,new TGeoTranslation(0,0,0));
    fullDetector->AddNode(PixelEndcaps,1,new TGeoTranslation(0,0,0));
-   return siAreas;
+	
+   //si Area text file output
+   ofstream ofsSiArea;
+   string style = to_string(complexity);
+   string out = "out/"+infile+"_SiArea_"+style+".txt";
+   double totonexoneModules = 0;
+   double tottwoxoneModules = 0;
+   double tottwoxtwoModules = 0;
+
+   ofsSiArea.open(out);
+   if(complexity!=0) ofsSiArea<<"Warning you are not viewing the full detector, switch to the full detector(style 0) to find siArea info for the entire layout"<<endl;
+   ofsSiArea<<"You are viewing: "<<infile<<" with style: "<<complexity<<endl<<"Endcaps"<<endl;
+
+   ofsSiArea<<"layer:    Number of 1x1 Modules:"<<endl;
+   for(int i = 0; i<nonexoneModule.size();i++){
+     ofsSiArea<<"    "<<i<<" has: "<<nonexoneModule[i]<<endl;
+     totonexoneModules+=nonexoneModule[i];
+   }
+
+   ofsSiArea<<"layer:    Number of 2x1 Modules:"<<endl;
+   for(int i = 0; i<ntwoxoneModule.size();i++){
+     ofsSiArea<<"    "<<i<<" has: "<<ntwoxoneModule[i]<<endl;
+     tottwoxoneModules+=ntwoxoneModule[i];
+   }
+
+   ofsSiArea<<"layer:    Number of 2x2 Modules:"<<endl;
+   for(int i = 0; i<ntwoxtwoModule.size();i++){
+     ofsSiArea<<"    "<<i<<" has: "<<ntwoxtwoModule[i]<<endl;
+     tottwoxtwoModules+=ntwoxtwoModule[i];
+   }
+  ofsSiArea<<"The Endcaps have a total of: "<<totonexoneModules<<" 1x1 Modules, "<<tottwoxoneModules<<" 2x1 Modules, and "<<tottwoxtwoModules<<" 2x2 Modules"<<endl<<endl;
+  ofsSiArea.close();
+
+  return siAreas;
 } 
 
 

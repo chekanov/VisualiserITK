@@ -171,16 +171,17 @@ TGeoMedium *Ts = new TGeoMedium("Ts",12,12,0,0,0,20,0.1000000E+11,0.212,0.100000
     reader.initialize();
 
    /* ------------------- show each parts of the detector -------------------*/
-   // display pixel barrel
-   if(displayBarrelAndRings){
-   ShowPixelBarrel *pixelBarrel = new ShowPixelBarrel();
-   siAreaBarrel = pixelBarrel->process(reader,top, innerDetector, fullDetector, geom, argComplexity);
-   }
-	
+   	
    // display pixel endcap 
    if(displayEndcaps){
    ShowPixelEndcap *pixelEndcap = new ShowPixelEndcap();
-   siAreaEndcaps = pixelEndcap->process(reader,top, innerDetector, fullDetector, geom, argComplexity);
+   siAreaEndcaps = pixelEndcap->process(reader,top, innerDetector, fullDetector, geom, argComplexity, infile);
+   }
+   
+   //display pixel barrel
+   if(displayBarrelAndRings){
+   ShowPixelBarrel *pixelBarrel = new ShowPixelBarrel();
+   siAreaBarrel = pixelBarrel->process(reader,top, innerDetector, fullDetector, geom, argComplexity,infile);
    }
 
     //display pixel simple services
@@ -222,22 +223,26 @@ TGeoMedium *Ts = new TGeoMedium("Ts",12,12,0,0,0,20,0.1000000E+11,0.212,0.100000
 
    //siArea info 
    std::ofstream ofsSiArea;
-   string out="out/"+infile+"_siArea_"+style+".txt";
-   ofsSiArea.open(out);
+   string out="out/"+infile+"_SiArea_"+style+".txt";
+   ofsSiArea.open(out,ios::app);
 
+   //siArea for Barrel 
    for(int iB = 0; iB<siAreaBarrel.size();iB++){
      cout<<"Silicon area in layer: "<<iB<<" of the Barrel and Rings assembly has: "<<siAreaBarrel[iB]<<"  mm^2 si"<<endl;
      ofsSiArea<<"Silicon area in layer: "<<iB<<" of the Barrel and Rings assembly has: "<<siAreaBarrel[iB]<<"  mm^2 si"<<endl;
      totalSiAreaBarrel += siAreaBarrel[iB];
    }
+
    cout<<"Area of Silicon in Barrel:                                    "<<totalSiAreaBarrel<<" mm^2"<<endl;
    ofsSiArea<<"Area of Silicon in Barrel:                                    "<<totalSiAreaBarrel<<" mm^2"<<endl;
 
+   //si area for endcaps
    for(int iE = 0; iE<siAreaEndcaps.size();iE++){
      cout<<"Silicon area in layer: "<<iE<<" of the Endcaps assembly has:         "<<siAreaEndcaps[iE]<<"  mm^2 si"<<endl;
      ofsSiArea<<"Silicon area in layer: "<<iE<<" of the Endcaps assembly has:         "<<siAreaEndcaps[iE]<<"  mm^2 si"<<endl;
      totalSiAreaEndcaps += siAreaEndcaps[iE];
    }
+
    cout<<"Area of Silicon in Endcaps:                                   "<<totalSiAreaEndcaps<<" mm^2"<<endl;
    ofsSiArea<<"Area of Silicon in Endcaps:                                   "<<totalSiAreaEndcaps<<" mm^2"<<endl;
    totalSiArea = totalSiAreaEndcaps + totalSiAreaBarrel;
