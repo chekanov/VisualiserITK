@@ -1,7 +1,7 @@
 # VisualiserITK
 A tool to visualuse ITK geometry for the ATLAS phase 2 upgrade. 
 This package reads XML files with the ITK layouts and visuaize them using the EVE ROOT event display,
-with additional output files (GDML, ROOT, JSON) inside the "out" directory.
+with additional output files (GDML, ROOT, JSON, TXT) inside the "out" directory.
 
 # Installation instruction
 
@@ -48,25 +48,33 @@ cd VisualiserITK-master
 make
 ```
   
-This creates the executable "main". Run it and you will see the EVE display with the layout.
-In addition, the program creates several output files (ROOT, JSON, GDML) for further exploration of the layout.
+This creates the executable "A_RUN". Run it and you will see the EVE display with the layout. In order to go through all the available layouts close eve and allow the program to run through all "styles" and "layouts".
+In addition, the program creates several output files (ROOT, JSON, GDML, TXT) for further exploration of the layout.
+At the end of each output file is a number, ie. "Inclined_Quads_3.root", which corresponds to a style or complexity of the visualisation.
 
+## Styles
+
+0: full detector.
+1: no modules shown, only support structures.
+2: removes structures that only exist in the -z region of the detector (displays half the detector).
+3: only the inner 2 layers of the detector (US build).
 
 # How to modify the input layout
 
-This program reads the XML files from the directory "xml". The XML files are orginized in the subdirectoris. You can change 
+This program reads the XML files from the directory "xml". The XML files are orginized into subdirectories. You can change 
 the layout directory on the line "XMLReaderSvc reader("ATLAS-P2-ITK-16-00-00")" inside "main.cxx" and recompile it. 
-The files are read from the directory "xml/layout" which have the following generic files: 
+The files are read from the directory "xml/'layout'" where 'layout' is the name of a different Pixel layout, namely Inclined_ALternative, Inclined_Quads, and Inclined_Duals. They have the following generic files: 
  
 ```bash
 Materials.xml
 PixelBarrel.xml
 PixelModules.xml
 PixelStave.xml
+PixelSimpleService.xml
+PixelEndcapDiskSupport.xml
 ```
 
-In fact, they are just the symbolic links to the corresponding ATLAS layout files. Simply run "source ./README" inside
-the the "xml/layout" directory  to point to the necessary layout files. For ATLAS, you will need to download these XML files and make the corresponding symbolic links.
+In fact, they are just the symbolic links to the corresponding ATLAS layout files. For ATLAS, you will need to download these XML files and make the corresponding symbolic links back to the generic files in the "xml/'layout'" directory.
 Typically, the XML files can be downloaded from the "share" directory of the [InDetTrackingGeometryXML package](https://svnweb.cern.ch/trac/atlasoff/browser/InnerDetector/InDetDetDescr/InDetTrackingGeometryXML/trunk/share?order=name) (available for ATLAS members only).
  
 # More explanation on codding
@@ -76,14 +84,13 @@ The file names start from the string "Show" and have a single method:
 
 
 ```c++
-process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeoManager* geom)
+process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeoManager* geom, int complexity, string infile)
 ```
-
-Currently, only PixelBarrel is (almost) implemented. 
 
 
 S.Chekanov (ANL)
 
+A.Fischer 
  
 
 
