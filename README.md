@@ -52,6 +52,10 @@ This creates the executable "A_RUN". Run it and you will see the EVE display wit
 In addition, the program creates several output files (ROOT, JSON, GDML, TXT) for further exploration of the layout.
 At the end of each output file is a number, ie. "Inclined_Quads_3.root", which corresponds to a style or complexity of the visualisation.
 
+## Viewing in OpenGL
+
+To view in a slightly faster window run view_ogl.py to run a script that will open the visualization in OpenGL.
+
 ## Styles
 
 0: full detector.
