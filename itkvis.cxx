@@ -198,10 +198,13 @@ TGeoMedium *Ts = new TGeoMedium("Ts",12,12,0,0,0,20,0.1000000E+11,0.212,0.100000
 
    // beam pipe
    if(displayBeamPipe){
-   TGeoVolume *BEAMPIPE = geom->MakeTube("BeamPipe", Be , 32, 32, 3500);
+   TGeoVolume *BEAMPIPE;
+   if (argComplexity ==1) BEAMPIPE = geom->MakeTube("BeamPipe", Be , 32, 32, 3500*0.5);
+   else BEAMPIPE = geom->MakeTube("BeamPipe", Be , 32, 32, 3500);
    BEAMPIPE->SetLineColor(43);
    BEAMPIPE->SetTransparency(50);
-   top->AddNode(BEAMPIPE, 0, new TGeoTranslation(0,0,0));
+   if (argComplexity == 1) top->AddNode(BEAMPIPE, 0, new TGeoTranslation(0,0,3500*0.5));
+   else top->AddNode(BEAMPIPE, 0, new TGeoTranslation(0,0,0));
    }
 
    //--- close the geometry

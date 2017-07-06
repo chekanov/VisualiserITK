@@ -43,13 +43,24 @@
 		double zpos = (simpleServiceTube->Zmin+simpleServiceTube->Zmax)/2;
 		
 		if(simpleServiceTube->Zmin==0){ //displays services that are single pieces
-			TGeoVolume *simpleServiceTube_obj =geom->MakeTube(simpleServiceTubeName.c_str(),Al,simpleServiceTube->Rmin,simpleServiceTube->Rmax,dZ);
-			simpleServiceTube_obj->SetLineColor(kBlue);
-			simpleServiceTube_obj->SetTransparency(75);
-			//determine if the simple service belngs in the inner or full assembly
-			if(simpleServiceTube->Rmax<215) innerSimpleServiceAssembly->AddNode(simpleServiceTube_obj,1,new TGeoTranslation(0,0,0));
-			SimpleServiceAssembly->AddNode(simpleServiceTube_obj,1,new TGeoTranslation(0,0,0));
+			if(complexity!=1){
+				TGeoVolume *simpleServiceTube_obj =geom->MakeTube(simpleServiceTubeName.c_str(),Al,simpleServiceTube->Rmin,simpleServiceTube->Rmax,dZ);
+				simpleServiceTube_obj->SetLineColor(kBlue);
+				simpleServiceTube_obj->SetTransparency(75);
+				//determine if the simple service belngs in the inner or full assembly
+				if(simpleServiceTube->Rmax<215) innerSimpleServiceAssembly->AddNode(simpleServiceTube_obj,1,new TGeoTranslation(0,0,0));
+				SimpleServiceAssembly->AddNode(simpleServiceTube_obj,1,new TGeoTranslation(0,0,0));
+			}
+			else{
+				TGeoVolume *simpleServiceTube_obj =geom->MakeTube(simpleServiceTubeName.c_str(),Al,simpleServiceTube->Rmin,simpleServiceTube->Rmax,dZ*0.5);
+                                simpleServiceTube_obj->SetLineColor(kBlue);
+                                simpleServiceTube_obj->SetTransparency(75);
+                                //determine if the simple service belngs in the inner or full assembly
+                                if(simpleServiceTube->Rmax<215) innerSimpleServiceAssembly->AddNode(simpleServiceTube_obj,1,new TGeoTranslation(0,0,dZ * 0.5));
+                                SimpleServiceAssembly->AddNode(simpleServiceTube_obj,1,new TGeoTranslation(0,0,dZ * 0.5));
+			}
 		}
+
 		//display services that have mulitiple parts
 		else{
 			TGeoVolume *simpleServiceTube_obj =geom->MakeTube(simpleServiceTubeName.c_str(),Al,simpleServiceTube->Rmin,simpleServiceTube->Rmax,dZ/2);

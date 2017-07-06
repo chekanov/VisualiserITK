@@ -100,6 +100,7 @@ vector<double> ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume*
       double halfplainlength = reader.getHalfPlainLength(stave);
       double zstep = reader.getZStep(stave);
       layer_halfplainlength=halfplainlength;
+      if (complexity == 2) layer_halfplainlength*=0.5; //only want half a barrel
       float   stave_ang=-1*stave->b_tilt*degree;
       // cout << "barel module rotation=" << stave_ang << endl;
 
@@ -119,14 +120,17 @@ vector<double> ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume*
 
       stavename="Support ("+stave_type+")"; // +std::to_string(istave+1);
       //create the stave support
-      TGeoVolume *stave_obj = geom->MakeTrd1(stavename.c_str(), medStave, 0.5*stave_width, 0.00000000001 , layer_halfplainlength, 0.5*stave_thickness);
+      TGeoVolume *stave_obj;
+      if (complexity == 1) stave_obj = geom->MakeTrd1(stavename.c_str(), medStave, 0.5*stave_width, 0.00000000001 ,0.5*layer_halfplainlength, 0.5*stave_thickness);
+      else stave_obj = geom->MakeTrd1(stavename.c_str(), medStave, 0.5*stave_width, 0.00000000001 , layer_halfplainlength, 0.5*stave_thickness);
       stave_obj->SetLineColor(kRed);
       stave_obj->SetTransparency(70);  //root.cern.ch/doc/v608/classTGeoTranslation.html ;
      // rotate stave
      //TGeoTranslation * translate_stave = new TGeoTranslation(ll,0,0); 
       TGeoRotation * rot = new TGeoRotation(); 
       rot->SetAngles(90, 90, 0); 
-      assembly_stave->AddNode(stave_obj,ist+1 , new TGeoCombiTrans(0,0,0,rot));
+      if ( complexity ==1) assembly_stave->AddNode(stave_obj,ist+1 , new TGeoCombiTrans(0,0, 0.5*layer_halfplainlength ,rot));
+      else assembly_stave->AddNode(stave_obj,ist+1 , new TGeoCombiTrans(0,0,0,rot));
     
      //stave "mountain" modules aka. barrel ring modules
      if(stave_type.compare("Alpine")==0&&complexity!=2){
@@ -207,12 +211,13 @@ vector<double> ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume*
       int nmodplain = stave->b_modn;
       int nmodtrans = 2*stave->trans_pos.size();
       int NMOD = nmodtrans + nmodplain;
+      if (complexity==1) NMOD*=0.5;
       // add modules
       
       for (int imod=0; imod<NMOD; imod++) {
 	double nChips = 0;
         double areaChips = 0;
-
+	float zpos;
 	//siArea info and module counts
         nChips = plainModule->lengthChips * plainModule->widthMaxChips;
 		
@@ -230,8 +235,8 @@ vector<double> ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume*
         module_obj->SetTransparency(70);
 
         // shift all by 1 pixel 
-        float zpos=-halfplainlength+(0.5*(module_length+moduleplain_gap)) +  imod*(module_length+moduleplain_gap);
-
+       if(complexity != 1) zpos=-halfplainlength+(0.5*(module_length+moduleplain_gap)) +  imod*(module_length+moduleplain_gap);
+       else zpos=(0.5*(module_length+moduleplain_gap)) + imod*(module_length+moduleplain_gap);	
         // comment this out to speed up
         // shift since sits on top of stave
          assembly_stave->AddNode(module_obj, imod+stave_thickness, new TGeoCombiTrans((-stave_thickness-module_thickness)*0.5, 0, zpos, 0));
@@ -249,9 +254,10 @@ vector<double> ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume*
       float rotation_degree=stave_ang+ sector_phi*ist*degree;
       rotstave->SetAngles(rotation_degree, 0, 0); // all angles in degrees
                 
-      assembly_layer->AddNode(assembly_stave,ist+1, new TGeoCombiTrans(xpos,ypos,0,rotstave));
-  
+      if (complexity ==2) assembly_layer->AddNode(assembly_stave,ist+1, new TGeoCombiTrans(xpos,ypos,layer_halfplainlength * 0.25,rotstave));
+      else assembly_layer->AddNode(assembly_stave,ist+1, new TGeoCombiTrans(xpos,ypos,0,rotstave));
       stave->Print();
+
      }; // end loop over staves 
     }
  	/*//support rings for barrel
@@ -269,11 +275,14 @@ vector<double> ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume*
      cout << "Layer Nr " << layer->index << " HalfPlainLength=" << layer_halfplainlength << endl;
 //      Rmin, Rmax, and a half-length dZ=1cm :
       string fullname="PixelBarrelLayer"; // string(layer->name)+std::to_string(i);
-      TGeoVolume *LAYER = geom->MakeTube(fullname.c_str(), Al, layer_radius, layer_radius, layer_halfplainlength);
+      TGeoVolume *LAYER;
+      if (complexity ==1) LAYER = geom->MakeTube(fullname.c_str(), Al, layer_radius, layer_radius, layer_halfplainlength*0.5);
+      else LAYER = geom->MakeTube(fullname.c_str(), Al, layer_radius, layer_radius, layer_halfplainlength);
       LAYER->SetLineColor(kBlue);
       LAYER->SetTransparency(90);
       fullname="Layer"; //  + std::to_string(i);
-      assembly_layer->AddNode(LAYER, i+1, new TGeoTranslation(0,0,0));
+      if (complexity == 1) assembly_layer->AddNode(LAYER, i+1, new TGeoTranslation(0,0,layer_halfplainlength * 0.5));
+      else assembly_layer->AddNode(LAYER, i+1, new TGeoTranslation(0,0,0));
 
 //    add the layers to the appropriate assemblies
       if(i<2)innerPixelBarrel->AddNode(assembly_layer, i+1, new TGeoTranslation(0,0,0));
