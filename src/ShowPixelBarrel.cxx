@@ -118,13 +118,14 @@ vector<double> ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume*
       TGeoVolume *assembly_barrelring = new TGeoVolumeAssembly(barrelringname.c_str());
 
       stavename="Support ("+stave_type+")"; // +std::to_string(istave+1);
-      TGeoVolume *stave_obj = geom->MakeBox(stavename.c_str(), medStave, stave_thickness, 0.5*stave_width, stave->support_halflength);
+      //create the stave support
+      TGeoVolume *stave_obj = geom->MakeTrd1(stavename.c_str(), medStave, 0.5*stave_width, 0.00000000001 , layer_halfplainlength, 0.5*stave_thickness);
       stave_obj->SetLineColor(kRed);
       stave_obj->SetTransparency(70);  //root.cern.ch/doc/v608/classTGeoTranslation.html ;
      // rotate stave
      //TGeoTranslation * translate_stave = new TGeoTranslation(ll,0,0); 
       TGeoRotation * rot = new TGeoRotation(); 
-      rot->SetAngles(0, 0, 0); 
+      rot->SetAngles(90, 90, 0); 
       assembly_stave->AddNode(stave_obj,ist+1 , new TGeoCombiTrans(0,0,0,rot));
     
      //stave "mountain" modules aka. barrel ring modules
@@ -219,10 +220,11 @@ vector<double> ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume*
         if(nChips == 2) twoxoneModule++;
         if(nChips == 4) twoxtwoModule++;
 	
+	
         areaChips = reader.getChipTemplate(plainModule->chip_type)->length * reader.getChipTemplate(plainModule->chip_type)->width;
         siArea += areaChips * nChips;
 
-        TGeoVolume * module_obj =  geom->MakeBox(module_name.c_str(),medModule,module_thickness,0.5*module_width,0.5*module_length);
+        TGeoVolume * module_obj =  geom->MakeBox(module_name.c_str(),medModule,0.5*module_thickness,0.5*module_width,0.5*module_length);
         module_obj->SetLineColor(80);
         module_obj->SetFillColor(80);
         module_obj->SetTransparency(70);
@@ -231,15 +233,15 @@ vector<double> ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume*
         float zpos=-halfplainlength+(0.5*(module_length+moduleplain_gap)) +  imod*(module_length+moduleplain_gap);
 
         // comment this out to speed up
-        // shift +1 mm since sits on top of stave
-         assembly_stave->AddNode(module_obj, imod+stave_thickness, new TGeoCombiTrans(1,0,zpos,rot));
+        // shift since sits on top of stave
+         assembly_stave->AddNode(module_obj, imod+stave_thickness, new TGeoCombiTrans((-stave_thickness-module_thickness)*0.5, 0, zpos, 0));
 
       } // end loop over modules 
     
 
 
-      float xpos=(layer_radius-stave_thickness)*TMath::Cos(sector_phi*ist);
-      float ypos=(layer_radius-stave_thickness)*TMath::Sin(sector_phi*ist);
+      float xpos=(layer_radius)*TMath::Cos(sector_phi*ist);
+      float ypos=(layer_radius)*TMath::Sin(sector_phi*ist);
       
 
       TGeoRotation * rotstave = new TGeoRotation();

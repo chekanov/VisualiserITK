@@ -105,7 +105,7 @@ vector<double> ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume*
 			else modType = layer->modtype[iR];
 
 			if(layer->thickness[1]!=0) totalRingThickness=layer->thickness[iR];
-			if(support->rmin[1]<=1||support->rmin[1]>3000000) supportInnerRadius=support->rmin[0]; //something really weird happens here where the rmin and rmax become absurd numbers, returning an address???
+			if(support->rmin[1]<=1||support->rmin[1]>3000000) supportInnerRadius=support->rmin[0]; 
 			if(support->rmax[1]<=1||support->rmax[1]>3000000) supportOuterRadius=support->rmax[0];
 			
 			cout<<"Disk Support number/inner radius / outer radius"<<iR<<" / "<<supportInnerRadius<<" / "<<supportOuterRadius<<endl;	
@@ -113,6 +113,11 @@ vector<double> ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume*
 			TGeoVolume *ring_obj = geom->MakeTubs(halfringname.c_str(),medRing,supportInnerRadius,supportOuterRadius,supportThickness,-1*PI*degree/2,PI*degree/2);
 			ring_obj->SetLineColor(kBlack);
 			ring_obj->SetTransparency(65);	
+
+			TGeoVolume *ring_obj_mirror = geom->MakeTubs(halfringname.c_str(),medRing,supportInnerRadius,supportOuterRadius,supportThickness,-1*PI*degree/2,PI*degree/2);
+                        ring_obj_mirror->SetLineColor(kBlack);
+                        ring_obj_mirror->SetTransparency(65);
+
 						
 			TGeoRotation *rot = new TGeoRotation();
 			rot->RotateZ(180);		//sets up rotation for other half of endcap 
@@ -140,12 +145,18 @@ vector<double> ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume*
 				ModuleTmp *moduleTmp = reader.getModuleTemplate(modType);
 				double phiOfMod0 = layer->phioffset[0];
                                 if(phiOfMod0 == 0) phiOfMod0 = PI/2;
+				//paramaters that define the 4 different types of modules
 				double ringModuleAngle =iS * angleSector * 2 - (degree * phiOfMod0)+angleSector;
+				double ringModuleAngleMirror =iS * angleSector * 2 - (degree * phiOfMod0)+angleSector;
 				double ringModuleRadius = innerradius + moduleTmp->length/2;
 				double xPos = ringModuleRadius * cos(ringModuleAngle/degree);
 				double yPos = ringModuleRadius * sin(ringModuleAngle/degree);
 				double xPosShift = ringModuleRadius * cos((ringModuleAngle+angleSector)/degree);
 				double yPosShift = ringModuleRadius * sin((ringModuleAngle+angleSector)/degree);
+				double xPosMirror = ringModuleRadius * cos(ringModuleAngleMirror/degree);
+                                double yPosMirror = ringModuleRadius * sin(ringModuleAngleMirror/degree);
+                                double xPosShiftMirror = ringModuleRadius * cos((ringModuleAngleMirror+angleSector)/degree);
+                                double yPosShiftMirror = ringModuleRadius * sin((ringModuleAngleMirror+angleSector)/degree);
 				double nChips = 0;
                                 double areaChips = 0;
 				
@@ -164,6 +175,11 @@ vector<double> ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume*
 				 //can be updated to allow for varying zoffsets among rings
 				ring_obj->AddNode(module,iS+1,new TGeoCombiTrans(xPosShift, yPosShift, -(layer->zoffset[0]),rotModuleDoubleSided));
 
+				if(layer->splitOffSet!=0){
+				ring_obj_mirror->AddNode(module,iS+1,new TGeoCombiTrans(xPosMirror, yPosMirror, -(layer->zoffset[0]),rotModule));
+				ring_obj_mirror->AddNode(module,iS+1,new TGeoCombiTrans(xPosShiftMirror, yPosShiftMirror, (layer->zoffset[0]),rotModuleDoubleSided));				
+				}
+				
 				nChips = moduleTmp->lengthChips * moduleTmp->widthMaxChips;
 								
 				//the number of modules is dependent on the number of times the halfring is copied
@@ -182,8 +198,7 @@ vector<double> ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume*
 				}
 				
 				nChips = nChips *4;  //each half ring is half a ring and is double sided
-
-      				areaChips = reader.getChipTemplate(moduleTmp->chip_type)->length * reader.getChipTemplate(moduleTmp->chip_type)->width;
+				areaChips = reader.getChipTemplate(moduleTmp->chip_type)->length * reader.getChipTemplate(moduleTmp->chip_type)->width;
         			siArea += (areaChips * nChips);
 				
 			
@@ -195,14 +210,15 @@ vector<double> ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume*
 			
 			//------adds rings to assemblies
 			assembly_rings->AddNode(ring_obj,iR+1,new TGeoCombiTrans(0,0,ringposition+(layer->splitOffSet),0));
-			assembly_rings->AddNode(ring_obj,iR+1,new TGeoCombiTrans(0,0,ringposition-(layer->splitOffSet),rot));
+			if(layer->splitOffSet!=0) assembly_rings->AddNode(ring_obj_mirror,iR+1,new TGeoCombiTrans(0,0,ringposition-(layer->splitOffSet),rot));
+			else assembly_rings->AddNode(ring_obj,iR+1,new TGeoCombiTrans(0,0,ringposition,rot));
 			//halfrings are shifted away to make room for servicies
 
 			//add the second half of the detector in the -z area
 			if(complexity!=1){ 
                         assembly_rings->AddNode(ring_obj,iR+1+nRings,new TGeoCombiTrans(0,0,-ringposition+(layer->splitOffSet),0));
-			//not sure which side is shifted in which direction right now its arbitrary
-                        assembly_rings->AddNode(ring_obj,iR+1+nRings,new TGeoCombiTrans(0,0,-ringposition-(layer->splitOffSet),rot));
+			if(layer->splitOffSet!=0) assembly_rings->AddNode(ring_obj_mirror,iR+1+nRings,new TGeoCombiTrans(0,0,-ringposition-(layer->splitOffSet),rot));
+			else assembly_rings->AddNode(ring_obj,iR+1+nRings,new TGeoCombiTrans(0,0,-ringposition,rot));
                        	//^^^^adds the other side of the detector as a mirror provided the user set complexity at an appropriate value
                         }
 
