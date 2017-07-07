@@ -319,49 +319,97 @@
     <linearweight> 0 </linearweight>
   </MaterialWeight>
 
+<!-- InclinedQuads - longeron wall values (18% total) -->
   <MaterialWeight>
-    <name> Default_Slim_InclBrl4_L2L3_Fixed_Weight </name>
+    <name> Default_Slim_InclBrl4_L2L3W_Fixed_Weight </name>
     <base> CarbonFibre </base>
-    <weight> 49.5 </weight>
+    <weight> 8.91 </weight>
     <linearweight> 0 </linearweight>
   </MaterialWeight>
 
   <MaterialWeight>
-    <name> Default_Slim_InclBrl4_L3L4_3CL_Fixed_Weight </name>
+    <name> Default_Slim_InclBrl4_L3L4W_3CL_Fixed_Weight </name>
     <base> CarbonFibre </base>
-    <weight> 66.0 </weight>
+    <weight> 11.88 </weight>
     <linearweight> 0 </linearweight>
   </MaterialWeight>
 
   <MaterialWeight>
-    <name> Default_Slim_InclBrl4_L3L4_4CL_Fixed_Weight </name>
+    <name> Default_Slim_InclBrl4_L3L4W_4CL_Fixed_Weight </name>
     <base> CarbonFibre </base>
-    <weight> 66.0 </weight>
+    <weight> 11.88 </weight>
+    <linearweight> 0 </linearweight>
+  </MaterialWeight>
+
+<!-- InclinedQuads - longeron corner values (82% total) -->
+  <MaterialWeight>
+    <name> Default_Slim_InclBrl4_L2L3C_Fixed_Weight </name>
+    <base> CarbonFibre </base>
+    <weight> 40.59 </weight>
+    <linearweight> 0 </linearweight>
+  </MaterialWeight>
+
+  <MaterialWeight>
+    <name> Default_Slim_InclBrl4_L3L4C_3CL_Fixed_Weight </name>
+    <base> CarbonFibre </base>
+    <weight> 54.12 </weight>
+    <linearweight> 0 </linearweight>
+  </MaterialWeight>
+
+  <MaterialWeight>
+    <name> Default_Slim_InclBrl4_L3L4C_4CL_Fixed_Weight </name>
+    <base> CarbonFibre </base>
+    <weight> 54.12 </weight>
     <linearweight> 0 </linearweight>
   </MaterialWeight>
 
 
-<!-- InclinedQuads values -->
+
+<!-- InclinedDuals values - longeron wall values (18% total)  -->
   <MaterialWeight>
-    <name> Default_Slim_InclBrl4_InclDual_L2L3_3CL_Fixed_Weight </name>
+    <name> Default_Slim_InclBrl4_InclDual_L2L3W_3CL_Fixed_Weight </name>
     <base> CarbonFibre </base>
-    <weight> 66.0 </weight>
+    <weight> 11.88 </weight>
     <linearweight> 0 </linearweight>
   </MaterialWeight>
   
   <MaterialWeight>
-    <name> Default_Slim_InclBrl4_InclDual_L2L3_4CL_Fixed_Weight </name>
+    <name> Default_Slim_InclBrl4_InclDual_L2L3W_4CL_Fixed_Weight </name>
     <base> CarbonFibre </base>
-    <weight> 66.0 </weight>
+    <weight> 11.88 </weight>
     <linearweight> 0 </linearweight>
   </MaterialWeight>
 
   <MaterialWeight>
-    <name> Default_Slim_InclBrl4_InclDual_L3L4_Fixed_Weight </name>
+    <name> Default_Slim_InclBrl4_InclDual_L3L4W_Fixed_Weight </name>
     <base> CarbonFibre </base>
-    <weight> 49.5 </weight>
+    <weight> 8.91 </weight>
     <linearweight> 0 </linearweight>
   </MaterialWeight>
+
+<!-- InclinedDuals values - longeron corner values (82% total)  -->
+
+  <MaterialWeight>
+    <name> Default_Slim_InclBrl4_InclDual_L2L3C_3CL_Fixed_Weight </name>
+    <base> CarbonFibre </base>
+    <weight> 54.12 </weight>
+    <linearweight> 0 </linearweight>
+  </MaterialWeight>
+  
+  <MaterialWeight>
+    <name> Default_Slim_InclBrl4_InclDual_L2L3C_4CL_Fixed_Weight </name>
+    <base> CarbonFibre </base>
+    <weight> 54.12 </weight>
+    <linearweight> 0 </linearweight>
+  </MaterialWeight>
+
+  <MaterialWeight>
+    <name> Default_Slim_InclBrl4_InclDual_L3L4C_Fixed_Weight </name>
+    <base> CarbonFibre </base>
+    <weight> 40.59 </weight>
+    <linearweight> 0 </linearweight>
+  </MaterialWeight>
+
 
 <!-- ITk pixel stave materials by Ben -->
 

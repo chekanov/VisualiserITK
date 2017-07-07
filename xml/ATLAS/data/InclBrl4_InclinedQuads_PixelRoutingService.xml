@@ -132,7 +132,7 @@ Routes by position : radius=... -> radial position
 
 <ServiceSet>
   <name>BarrelLayer_0</name>
-  <Service>  data   *1_chip    lin std::Copper  0.000137 std::Aluminium  0.000666  pix::Polyethylene 0.000931  pix::Polyester 0.000108  Cu-clad_Al  </Service>
+  <Service>  data   /1_chip    lin std::Copper  0.000137 std::Aluminium  0.000666  pix::Polyethylene 0.000931  pix::Polyester 0.000108  Cu-clad_Al  </Service>
   <Service>  CMDCLK /1_module  lin std::Copper  0.00057  std::Aluminium  0.00004   pix::Polyimide  0.00011   Cu  </Service>
   <Service>  DCS    /22_module   lin std::Copper  0.00230  std::Aluminium  0.00007   pix::Polyimide  0.00020   Cu  </Service>
   <Service>  HV     /22_module   lin std::Copper  0.00023  std::Aluminium  0.00004   pix::Polyimide  0.00020   Cu  </Service>
@@ -143,7 +143,7 @@ Routes by position : radius=... -> radial position
 
 <ServiceSet>
   <name>BarrelLayer_1</name>
-  <Service>  data   *2_chip  lin std::Copper  0.000137 std::Aluminium  0.000666  pix::Polyethylene 0.000931  pix::Polyester 0.000108  Cu-clad_Al  </Service>
+  <Service>  data   /2_chip  lin std::Copper  0.000137 std::Aluminium  0.000666  pix::Polyethylene 0.000931  pix::Polyester 0.000108  Cu-clad_Al  </Service>
   <Service>  CMDCLK /1_module  lin std::Copper  0.00057  std::Aluminium  0.00004   pix::Polyimide  0.00011   Cu  </Service>
   <Service>  DCS    /32_module  lin std::Copper  0.00230  std::Aluminium  0.00007   pix::Polyimide  0.00020   Cu  </Service>
   <Service>  HV     /32_module  lin std::Copper  0.00023  std::Aluminium  0.00004   pix::Polyimide  0.00020   Cu  </Service>
@@ -154,7 +154,7 @@ Routes by position : radius=... -> radial position
 
 <ServiceSet>
   <name>BarrelLayer_2</name>
-  <Service>  data   *2_chip  lin std::Copper  0.000137 std::Aluminium  0.000666  pix::Polyethylene 0.000931  pix::Polyester 0.000108  Cu-clad_Al  </Service>
+  <Service>  data   /1_chip  lin std::Copper  0.000137 std::Aluminium  0.000666  pix::Polyethylene 0.000931  pix::Polyester 0.000108  Cu-clad_Al  </Service>
   <Service>  CMDCLK /1_module  lin std::Copper  0.00057  std::Aluminium  0.00004   pix::Polyimide  0.00011   Cu  </Service>
   <Service>  DCS    /23_module  lin std::Copper  0.00230  std::Aluminium  0.00007   pix::Polyimide  0.00020   Cu  </Service>
   <Service>  HV     /23_module  lin std::Copper  0.00023  std::Aluminium  0.00004   pix::Polyimide  0.00020   Cu  </Service>
@@ -165,7 +165,7 @@ Routes by position : radius=... -> radial position
 
 <ServiceSet>
   <name>BarrelLayer_3</name>
-  <Service>  data   *4_chip  lin std::Copper  0.000137 std::Aluminium  0.000666  pix::Polyethylene 0.000931  pix::Polyester 0.000108  Cu-clad_Al  </Service>
+  <Service>  data   /2_chip  lin std::Copper  0.000137 std::Aluminium  0.000666  pix::Polyethylene 0.000931  pix::Polyester 0.000108  Cu-clad_Al  </Service>
   <Service>  CMDCLK /1_module  lin std::Copper  0.00057  std::Aluminium  0.00004   pix::Polyimide  0.00011   Cu  </Service>
   <Service>  DCS    /25_module  lin std::Copper  0.00230  std::Aluminium  0.00007   pix::Polyimide  0.00020   Cu  </Service>
   <Service>  HV     /25_module  lin std::Copper  0.00023  std::Aluminium  0.00004   pix::Polyimide  0.00020   Cu  </Service>
@@ -176,7 +176,7 @@ Routes by position : radius=... -> radial position
 
 <ServiceSet>
   <name>BarrelLayer_4</name>
-  <Service>  data   *4_chip  lin std::Copper  0.000137 std::Aluminium  0.000666  pix::Polyethylene 0.000931  pix::Polyester 0.000108  Cu-clad_Al  </Service>
+  <Service>  data   /4_chip  lin std::Copper  0.000137 std::Aluminium  0.000666  pix::Polyethylene 0.000931  pix::Polyester 0.000108  Cu-clad_Al  </Service>
   <Service>  CMDCLK /1_module  lin std::Copper  0.00057  std::Aluminium  0.00004   pix::Polyimide  0.00011   Cu  </Service>
   <Service>  DCS    /27_module  lin std::Copper  0.00230  std::Aluminium  0.00007   pix::Polyimide  0.00020   Cu  </Service>
   <Service>  HV     /27_module  lin std::Copper  0.00023  std::Aluminium  0.00004   pix::Polyimide  0.00020   Cu  </Service>
@@ -274,7 +274,7 @@ Routes by position : radius=... -> radial position
    <Service>  HV2         /11_module lin std::Copper  0.000360  std::Aluminium  0.0       pix::Polyimide  0.000083  Cu  </Service>
    <Service>  CLK_COM1    /11_module lin std::Copper  0.000360  std::Aluminium  0.0       pix::Polyimide  0.000083  Cu  </Service>
    <Service>  CLK_COM2    /11_module lin std::Copper  0.000360  std::Aluminium  0.0       pix::Polyimide  0.000083  Cu  </Service>
-   <Service>  data        /1_module  lin std::Copper  0.000474  std::Aluminium  0.000172  pix::Polyimide  0.000554  Cu  </Service>
+   <Service>  data        /2_chip  lin std::Copper  0.000474  std::Aluminium  0.000172  pix::Polyimide  0.000554  Cu  </Service>
    <Service>  DCS_Power1  /11_module lin std::Copper  0.000551  std::Aluminium  0.000941  pix::Polyimide  0.001912  Cu-clad_Al  </Service>
    <Service>  DCS_Power2  /11_module lin std::Copper  0.000551  std::Aluminium  0.000941  pix::Polyimide  0.001912  Cu-clad_Al  </Service>
    <Service>  DCS_Signal1 /11_module lin std::Copper  0.000227  std::Aluminium  0.0       pix::Polyimide  0.000054  Cu  </Service>
@@ -292,7 +292,7 @@ Routes by position : radius=... -> radial position
    <Service>  HV2         /8_module lin std::Copper  0.000360  std::Aluminium  0.0       pix::Polyimide  0.000083  Cu  </Service>
    <Service>  CLK_COM1    /8_module lin std::Copper  0.000360  std::Aluminium  0.0       pix::Polyimide  0.000083  Cu  </Service>
    <Service>  CLK_COM2    /8_module lin std::Copper  0.000360  std::Aluminium  0.0       pix::Polyimide  0.000083  Cu  </Service>
-   <Service>  data        /1_module  lin std::Copper  0.000474  std::Aluminium  0.000172  pix::Polyimide  0.000554  Cu  </Service>
+   <Service>  data        /1_chip  lin std::Copper  0.000474  std::Aluminium  0.000172  pix::Polyimide  0.000554  Cu  </Service>
    <Service>  DCS_Power1  /8_module lin std::Copper  0.000551  std::Aluminium  0.000941  pix::Polyimide  0.001912  Cu-clad_Al  </Service>
    <Service>  DCS_Power2  /8_module lin std::Copper  0.000551  std::Aluminium  0.000941  pix::Polyimide  0.001912  Cu-clad_Al  </Service>
    <Service>  DCS_Signal1 /8_module lin std::Copper  0.000227  std::Aluminium  0.0       pix::Polyimide  0.000054  Cu  </Service>
@@ -316,7 +316,7 @@ Routes by position : radius=... -> radial position
    <Service>  CLK_COM2    /16_module lin std::Copper  0.000360  std::Aluminium  0.0       pix::Polyimide  0.000083  Cu  </Service>
    <Service>  CLK_COM3    /16_module lin std::Copper  0.000360  std::Aluminium  0.0       pix::Polyimide  0.000083  Cu  </Service>
    <Service>  CLK_COM4    /16_module lin std::Copper  0.000360  std::Aluminium  0.0       pix::Polyimide  0.000083  Cu  </Service>
-   <Service>  data        /1_module  lin std::Copper  0.000474  std::Aluminium  0.000172  pix::Polyimide  0.000554  Cu  </Service>
+   <Service>  data        /1_chip  lin std::Copper  0.000474  std::Aluminium  0.000172  pix::Polyimide  0.000554  Cu  </Service>
    <Service>  DCS_Power1  /16_module lin std::Copper  0.000551  std::Aluminium  0.000941  pix::Polyimide  0.001912  Cu-clad_Al  </Service>
    <Service>  DCS_Power2  /16_module lin std::Copper  0.000551  std::Aluminium  0.000941  pix::Polyimide  0.001912  Cu-clad_Al  </Service>
    <Service>  DCS_Power3  /16_module lin std::Copper  0.000551  std::Aluminium  0.000941  pix::Polyimide  0.001912  Cu-clad_Al  </Service>
@@ -344,7 +344,7 @@ Routes by position : radius=... -> radial position
    <Service>  CLK_COM2    /22_module lin std::Copper  0.000360  std::Aluminium  0.0       pix::Polyimide  0.000083  Cu  </Service>
    <Service>  CLK_COM3    /22_module lin std::Copper  0.000360  std::Aluminium  0.0       pix::Polyimide  0.000083  Cu  </Service>
    <Service>  CLK_COM4    /22_module lin std::Copper  0.000360  std::Aluminium  0.0       pix::Polyimide  0.000083  Cu  </Service>
-   <Service>  data        /1_module  lin std::Copper  0.000474  std::Aluminium  0.000172  pix::Polyimide  0.000554  Cu  </Service>
+   <Service>  data        /2_chip  lin std::Copper  0.000474  std::Aluminium  0.000172  pix::Polyimide  0.000554  Cu  </Service>
    <Service>  DCS_Power1  /22_module lin std::Copper  0.000551  std::Aluminium  0.000941  pix::Polyimide  0.001912  Cu-clad_Al  </Service>
    <Service>  DCS_Power2  /22_module lin std::Copper  0.000551  std::Aluminium  0.000941  pix::Polyimide  0.001912  Cu-clad_Al  </Service>
    <Service>  DCS_Power3  /22_module lin std::Copper  0.000551  std::Aluminium  0.000941  pix::Polyimide  0.001912  Cu-clad_Al  </Service>
@@ -378,7 +378,7 @@ Routes by position : radius=... -> radial position
    <Service>  CLK_COM4    /26_module lin std::Copper  0.000360  std::Aluminium  0.0       pix::Polyimide  0.000083  Cu  </Service>
    <Service>  CLK_COM5    /26_module lin std::Copper  0.000360  std::Aluminium  0.0       pix::Polyimide  0.000083  Cu  </Service>
    <Service>  CLK_COM6    /26_module lin std::Copper  0.000360  std::Aluminium  0.0       pix::Polyimide  0.000083  Cu  </Service>
-   <Service>  data        /1_module  lin std::Copper  0.000474  std::Aluminium  0.000172  pix::Polyimide  0.000554  Cu  </Service>
+   <Service>  data        /4_chip  lin std::Copper  0.000474  std::Aluminium  0.000172  pix::Polyimide  0.000554  Cu  </Service>
    <Service>  DCS_Power1  /26_module lin std::Copper  0.000551  std::Aluminium  0.000941  pix::Polyimide  0.001912  Cu-clad_Al  </Service>
    <Service>  DCS_Power2  /26_module lin std::Copper  0.000551  std::Aluminium  0.000941  pix::Polyimide  0.001912  Cu-clad_Al  </Service>
    <Service>  DCS_Power3  /26_module lin std::Copper  0.000551  std::Aluminium  0.000941  pix::Polyimide  0.001912  Cu-clad_Al  </Service>
