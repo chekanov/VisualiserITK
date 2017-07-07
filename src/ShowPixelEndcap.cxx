@@ -71,7 +71,7 @@ vector<double> ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume*
 
 		EndcapLayerTmp *layer = layers.at(i);
 		EndcapDiskSupportTmp *support;
-		support = diskSupports.at(4-i);
+		support = diskSupports.at(diskSupports.size()-i-1);
 		cout<<"number of disk supports: "<<diskSupports.size()<<endl;
      		string layername="EndcapLayerAssembly"; 
       		TGeoVolume *assembly_layer = new TGeoVolumeAssembly(layername.c_str());
