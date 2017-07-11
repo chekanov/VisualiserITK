@@ -10,11 +10,11 @@
 // implementation of the endcap drawing
 vector<double> ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume* top, TGeoVolume* innerDetector, TGeoVolume* fullDetector, TGeoManager* geom, int complexity,string infile)
 {
-   vector<double> siAreas;
+   vector<double> siAreas;	//surface areas of silicon for modules
    vector<double> ntwoxoneModule;
    vector<double> ntwoxtwoModule;
    vector<double> nonexoneModule;
-
+   
    // define some constants
    const double degree=57.2958;
    const double PI=TMath::Pi();
@@ -68,7 +68,7 @@ vector<double> ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume*
 		double twoxoneModule = 0;
 	        double twoxtwoModule =0;
        		double onexoneModule = 0;
-
+		
 		EndcapLayerTmp *layer = layers.at(i);
 		EndcapDiskSupportTmp *support;
 		support = diskSupports.at(diskSupports.size()-i-1);
@@ -130,24 +130,22 @@ vector<double> ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume*
 			
 			if(layer->nsectors[1]==0){
 				nSectors = layer->nsectors[0];
-				 if (nSectors % 4 !=0) nSectors+=2; //a quick fix to fix a rounding issue (the meaning of sectors is unclear)
-				angleSector =(PI2*degree)/nSectors;
+				angleSector =(PI*degree)/nSectors;
 
 			}
 			else{
 				nSectors = layer->nsectors[iR];
-				if (nSectors % 4 !=0) nSectors+=2; //a quick fix to fix a rounding issue (the meaning of sectors is unclear)
-				angleSector =(PI2*degree)/nSectors;	//the arc angle taken up by each sector
+				angleSector =(PI*degree)/nSectors;	//the arc angle taken up by each sector
 			}
 			
 			//Build Sectors(areas that hold modules)
-			for(int iS = 0; iS<nSectors/4;++iS){
+			for(int iS = 0; iS<nSectors; ++iS){
 				ModuleTmp *moduleTmp = reader.getModuleTemplate(modType);
 				double phiOfMod0 = layer->phioffset[0];
                                 if(phiOfMod0 == 0) phiOfMod0 = PI/2;
-				//paramaters that define the 4 different types of modules
-				double ringModuleAngle =iS * angleSector * 2 - (degree * phiOfMod0)+angleSector;
-				double ringModuleAngleMirror =iS * angleSector * 2 - (degree * phiOfMod0)+angleSector;
+				//paramaters that define the 4 different types of modules can be cleaned up (very messy right now)
+				double ringModuleAngle =iS * angleSector - (degree * phiOfMod0);
+				double ringModuleAngleMirror =-iS * angleSector + (degree * phiOfMod0);
 				double ringModuleRadius = innerradius + moduleTmp->length/2;
 				double xPos = ringModuleRadius * cos(ringModuleAngle/degree);
 				double yPos = ringModuleRadius * sin(ringModuleAngle/degree);
@@ -155,58 +153,83 @@ vector<double> ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume*
 				double yPosShift = ringModuleRadius * sin((ringModuleAngle+angleSector)/degree);
 				double xPosMirror = ringModuleRadius * cos(ringModuleAngleMirror/degree);
                                 double yPosMirror = ringModuleRadius * sin(ringModuleAngleMirror/degree);
-                                double xPosShiftMirror = ringModuleRadius * cos((ringModuleAngleMirror+angleSector)/degree);
-                                double yPosShiftMirror = ringModuleRadius * sin((ringModuleAngleMirror+angleSector)/degree);
+                                double xPosShiftMirror = ringModuleRadius * cos((ringModuleAngleMirror-angleSector)/degree);
+                                double yPosShiftMirror = ringModuleRadius * sin((ringModuleAngleMirror-angleSector)/degree);
 				double nChips = 0;
-                                double areaChips = 0;
-				
+                                double areaChips = 0;		
+				double deadArea = 0;
+				int nPixels = 0; //for calculating siarea using the pixel count method
+
 				cout<<"ring module angle: "<<ringModuleAngle<<" half angle between modules: "<<angleSector<<endl;
-				TGeoRotation *rotModule = new TGeoRotation();
-				rotModule->RotateZ(ringModuleAngle);
-				TGeoRotation *rotModuleDoubleSided = new TGeoRotation();
-				rotModuleDoubleSided->RotateZ(ringModuleAngle + angleSector);
+				TGeoRotation *rotModule = new TGeoRotation();	
 
 				TGeoVolume *module = geom->MakeBox(modType.c_str(),medModule,moduleTmp->widthmax / 2, moduleTmp->length / 2, moduleTmp->thickness / 2);
 				module->SetLineColor(4);
 				module->SetTransparency(60);
 				
 				//add modules to the rings
-				ring_obj->AddNode(module,iS+1,new TGeoCombiTrans(xPos, yPos, (layer->zoffset[0]),rotModule));
+				if (iS%4 == 0){
+					rotModule->RotateZ(ringModuleAngle);
+					ring_obj->AddNode(module,iS+1,new TGeoCombiTrans(xPos, yPos, (layer->zoffset[0]),rotModule));
+				}
 				 //can be updated to allow for varying zoffsets among rings
-				ring_obj->AddNode(module,iS+1,new TGeoCombiTrans(xPosShift, yPosShift, -(layer->zoffset[0]),rotModuleDoubleSided));
-
+				if (iS%4 == 1){
+					rotModule->RotateZ(ringModuleAngle+angleSector);
+					ring_obj->AddNode(module,iS+1,new TGeoCombiTrans(xPosShift, yPosShift, -(layer->zoffset[0]),rotModule));
+				}	
 				if(layer->splitOffSet!=0){
-				ring_obj_mirror->AddNode(module,iS+1,new TGeoCombiTrans(xPosMirror, yPosMirror, -(layer->zoffset[0]),rotModule));
-				ring_obj_mirror->AddNode(module,iS+1,new TGeoCombiTrans(xPosShiftMirror, yPosShiftMirror, (layer->zoffset[0]),rotModuleDoubleSided));				
+					if (iS%4 == 2){
+						rotModule->RotateZ(ringModuleAngleMirror);
+			 			ring_obj_mirror->AddNode(module,iS+1,new TGeoCombiTrans(xPosMirror, yPosMirror, (layer->zoffset[0]),rotModule));
+					}
+					if (iS%4 == 3){
+				 		rotModule->RotateZ(ringModuleAngleMirror-angleSector);
+						ring_obj_mirror->AddNode(module,iS+1,new TGeoCombiTrans(xPosShiftMirror, yPosShiftMirror,- (layer->zoffset[0]),rotModule));		
+					}
 				}
 				
-				nChips = moduleTmp->lengthChips * moduleTmp->widthMaxChips;
-								
+				//---------------calculates Silicon surface area and tallies up module types
+				nChips = moduleTmp->lengthChips * moduleTmp->widthMaxChips;				
 				//the number of modules is dependent on the number of times the halfring is copied
 				if(complexity != 1) {
-					if(nChips == 1) onexoneModule+=8;
-	                                if(nChips == 2) twoxoneModule+=8;
-        	                        if(nChips == 4) twoxtwoModule+=8;
+					if(nChips == 1) {
+						onexoneModule+=2;
+						deadArea = 7.88*2;
+					}
+	                                if(nChips == 2) {
+						twoxoneModule+=2;
+						deadArea = 15.76*2; //same dead are for double length as dobule width
+					}
+        	                        if(nChips == 4) {
+						twoxtwoModule+=2;
+						deadArea = 31.52*2;
+					}
 					nChips = nChips * 2; //the second half of the detector (-z region)
 					
 				}
 				else{
-					if(nChips == 1) onexoneModule+=4;
-                                        if(nChips == 2) twoxoneModule+=4;
-                                        if(nChips == 4) twoxtwoModule+=4;
-
+					if(nChips == 1) {
+						onexoneModule++;
+						deadArea = 7.88;
+					}
+                                        if(nChips == 2){
+						twoxoneModule++;
+						deadArea = 15.76;//doesnt matter if double length or width
+                                        }
+                                        if(nChips == 4){
+						twoxtwoModule++;
+						deadArea = 31.52;
+					} 
 				}
 				
-				nChips = nChips *4;  //each half ring is half a ring and is double sided
+				//each half ring is half a ring and is double sided
 				areaChips = reader.getChipTemplate(moduleTmp->chip_type)->length * reader.getChipTemplate(moduleTmp->chip_type)->width;
-        			siArea += (areaChips * nChips);
-				
-			
-
+        			//siArea += (areaChips * nChips)+deadArea;
+        			nPixels=(reader.getChipTemplate(moduleTmp->chip_type)->rows * reader.getChipTemplate(moduleTmp->chip_type)->columns);
+				siArea += nPixels* nChips * (reader.getChipTemplate(moduleTmp->chip_type)->pitchPhi * reader.getChipTemplate(moduleTmp->chip_type)->pitchEta);
 				}//end loop over Modules
 				
-				
-			}//end if complexity!=1
+			}//end if complexity!=2 (ie. no modules)
 			
 			//------adds rings to assemblies
 			assembly_rings->AddNode(ring_obj,iR+1,new TGeoCombiTrans(0,0,ringposition+(layer->splitOffSet),0));
@@ -251,7 +274,7 @@ vector<double> ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume*
 
    ofsSiArea.open(out);
    if(complexity!=0) ofsSiArea<<"Warning you are not viewing the full detector, switch to the full detector(style 0) to find siArea info for the entire layout"<<endl;
-   ofsSiArea<<"You are viewing: "<<infile<<" with style: "<<complexity<<endl<<"Endcaps"<<endl;
+   ofsSiArea<<"Si Area calulated by summing pixel areas. You are viewing: "<<infile<<" with style: "<<complexity<<endl<<"Endcaps"<<endl;
 
    ofsSiArea<<"layer:    Number of 1x1 Modules:"<<endl;
    for(int i = 0; i<nonexoneModule.size();i++){
