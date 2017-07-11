@@ -190,7 +190,7 @@ vector<double> ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume*
 	//siArea += (areaChips * nChips)+deadArea;
 	
 	nPixels=(reader.getChipTemplate(ringModule->chip_type)->rows * reader.getChipTemplate(ringModule->chip_type)->columns);
-        siArea += nPixels * nChips * (reader.getChipTemplate(ringModule->chip_type)->pitchPhi * reader.getChipTemplate(ringModule->chip_type)->pitchEta);
+        siArea += nPixels * nChips * (reader.getChipTemplate(ringModule->chip_type)->pitchPhi * reader.getChipTemplate(ringModule->chip_type)->pitchEta)-2*20;
 	//end siArea info section
 
 	TGeoVolume * rmodule_obj =  geom->MakeBox(rmodule_name.c_str(),medModule,rmodule_thickness,0.5*rmodule_width,0.5*rmodule_length);
@@ -263,7 +263,7 @@ vector<double> ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume*
         //siArea += areaChips * nChips+deadArea;
 
 	nPixels=(reader.getChipTemplate(plainModule->chip_type)->rows * reader.getChipTemplate(plainModule->chip_type)->columns);
-        siArea += nPixels * nChips * (reader.getChipTemplate(plainModule->chip_type)->pitchPhi * reader.getChipTemplate(plainModule->chip_type)->pitchEta);
+        siArea += nPixels * nChips * (reader.getChipTemplate(plainModule->chip_type)->pitchPhi * reader.getChipTemplate(plainModule->chip_type)->pitchEta)-2*20;
 
         TGeoVolume * module_obj =  geom->MakeBox(module_name.c_str(),medModule,0.5*module_thickness,0.5*module_width,0.5*module_length);
         module_obj->SetLineColor(80);

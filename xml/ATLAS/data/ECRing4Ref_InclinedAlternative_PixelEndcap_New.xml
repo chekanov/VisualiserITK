@@ -7,7 +7,7 @@
       1228.0  1420.0   1646.0   1913.0   </RingPositions>
     <Radius> 36. 36. 36. 36. 36. 36. 36. 36. 36. 36. 36. 36. 36. 36. 36. 36. 50. 50. 50. 50.  </Radius>
     <RadiusType> Inner </RadiusType>
-    <NumberOfSectors> 22 </NumberOfSectors>
+    <NumberOfSectors> 20  </NumberOfSectors>
     <RingModuleType> SingleChip_RD53_20x19_Rot_thin </RingModuleType>
     <RingModuleZSeparation> 6.0 </RingModuleZSeparation>
   </PixelEndcapRing>

@@ -226,7 +226,7 @@ vector<double> ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume*
 				areaChips = reader.getChipTemplate(moduleTmp->chip_type)->length * reader.getChipTemplate(moduleTmp->chip_type)->width;
         			//siArea += (areaChips * nChips)+deadArea;
         			nPixels=(reader.getChipTemplate(moduleTmp->chip_type)->rows * reader.getChipTemplate(moduleTmp->chip_type)->columns);
-				siArea += nPixels* nChips * (reader.getChipTemplate(moduleTmp->chip_type)->pitchPhi * reader.getChipTemplate(moduleTmp->chip_type)->pitchEta);
+				siArea += nPixels* nChips * (reader.getChipTemplate(moduleTmp->chip_type)->pitchPhi * reader.getChipTemplate(moduleTmp->chip_type)->pitchEta)-2*20;
 				}//end loop over Modules
 				
 			}//end if complexity!=2 (ie. no modules)
