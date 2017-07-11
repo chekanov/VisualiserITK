@@ -150,24 +150,47 @@ vector<double> ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume*
      for(int irmod=0;irmod<rmodule_pos.size();irmod++){
 	double nChips = 0;
 	double areaChips = 0;
-	
+	double deadArea = 0;
+	int nPixels = 0;	
+
 	//siArea info and module counts
 	nChips = ringModule->lengthChips * ringModule->widthMaxChips;
 
-	if(complexity != 1) {
-                 if(nChips == 1) onexoneModule+=2;
-                 if(nChips == 2) twoxoneModule+=2;
-                 if(nChips == 4) twoxtwoModule+=2;
-		 nChips = nChips * 2; //the second half of the detector (-z region)
-	}
-	else{
-                 if(nChips == 1) onexoneModule++;
-                 if(nChips == 2) twoxoneModule++;
-                 if(nChips == 4) twoxtwoModule++;
-	}
+	 if(complexity != 1) {
+            if(nChips == 1) {
+                onexoneModule+=2;
+                deadArea = 7.88*2;
+            }
+            if(nChips == 2) {
+                twoxoneModule+=2;
+                deadArea = 15.76*2; //same dead are for double length as dobule width
+            }
+            if(nChips == 4) {
+                twoxtwoModule+=2;
+                deadArea = 31.52*2;
+            }
+            nChips = nChips * 2; //the second half of the detector (-z region)
+          }
+          else{
+            if(nChips == 1) {
+                 onexoneModule++;
+                 deadArea = 7.88;
+            }
+            if(nChips == 2){
+                 twoxoneModule++;
+                 deadArea = 15.76;//doesnt matter if double length or width
+            }
+            if(nChips == 4){
+                 twoxtwoModule++;
+                 deadArea = 31.52;
+            }
+          }
 
-	areaChips = reader.getChipTemplate(rmodule_chip)->length * reader.getChipTemplate(rmodule_chip)->width;
-	siArea += (areaChips * nChips);
+	//areaChips = reader.getChipTemplate(rmodule_chip)->length * reader.getChipTemplate(rmodule_chip)->width;
+	//siArea += (areaChips * nChips)+deadArea;
+	
+	nPixels=(reader.getChipTemplate(ringModule->chip_type)->rows * reader.getChipTemplate(ringModule->chip_type)->columns);
+        siArea += nPixels * nChips * (reader.getChipTemplate(ringModule->chip_type)->pitchPhi * reader.getChipTemplate(ringModule->chip_type)->pitchEta);
 	//end siArea info section
 
 	TGeoVolume * rmodule_obj =  geom->MakeBox(rmodule_name.c_str(),medModule,rmodule_thickness,0.5*rmodule_width,0.5*rmodule_length);
@@ -217,17 +240,30 @@ vector<double> ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume*
       for (int imod=0; imod<NMOD; imod++) {
 	double nChips = 0;
         double areaChips = 0;
+        double deadArea = 0;
+	int nPixels = 0;
 	float zpos;
 	//siArea info and module counts
         nChips = plainModule->lengthChips * plainModule->widthMaxChips;
 		
-	if(nChips == 1) onexoneModule++;
-        if(nChips == 2) twoxoneModule++;
-        if(nChips == 4) twoxtwoModule++;
+	if(nChips == 1) {
+           onexoneModule++;
+           deadArea = 7.88;
+        }
+        if(nChips == 2){
+           twoxoneModule++;
+	   deadArea = 15.76;
+        }
+        if(nChips == 4){
+           twoxtwoModule++;
+           deadArea = 31.52;
+        }
 	
-	
-        areaChips = reader.getChipTemplate(plainModule->chip_type)->length * reader.getChipTemplate(plainModule->chip_type)->width;
-        siArea += areaChips * nChips;
+        //areaChips = reader.getChipTemplate(plainModule->chip_type)->length * reader.getChipTemplate(plainModule->chip_type)->width;
+        //siArea += areaChips * nChips+deadArea;
+
+	nPixels=(reader.getChipTemplate(plainModule->chip_type)->rows * reader.getChipTemplate(plainModule->chip_type)->columns);
+        siArea += nPixels * nChips * (reader.getChipTemplate(plainModule->chip_type)->pitchPhi * reader.getChipTemplate(plainModule->chip_type)->pitchEta);
 
         TGeoVolume * module_obj =  geom->MakeBox(module_name.c_str(),medModule,0.5*module_thickness,0.5*module_width,0.5*module_length);
         module_obj->SetLineColor(80);
