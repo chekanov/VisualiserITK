@@ -102,6 +102,7 @@ vector<double> ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume*
       layer_halfplainlength=halfplainlength;
       if (complexity == 2) layer_halfplainlength*=0.5; //only want half a barrel
       float   stave_ang=-1*stave->b_tilt*degree;
+      if(stave->b_tilt == 0) stave_ang = 0.24435*degree; //default stave tilt angle if none is given
       // cout << "barel module rotation=" << stave_ang << endl;
 
 
@@ -190,7 +191,7 @@ vector<double> ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume*
 	//siArea += (areaChips * nChips)+deadArea;
 	
 	nPixels=(reader.getChipTemplate(ringModule->chip_type)->rows * reader.getChipTemplate(ringModule->chip_type)->columns);
-        siArea += nPixels * nChips * (reader.getChipTemplate(ringModule->chip_type)->pitchPhi * reader.getChipTemplate(ringModule->chip_type)->pitchEta);
+        siArea += nPixels * nChips * (reader.getChipTemplate(ringModule->chip_type)->pitchPhi * reader.getChipTemplate(ringModule->chip_type)->pitchEta)-2*20;
 	//end siArea info section
 
 	TGeoVolume * rmodule_obj =  geom->MakeBox(rmodule_name.c_str(),medModule,rmodule_thickness,0.5*rmodule_width,0.5*rmodule_length);
@@ -263,7 +264,7 @@ vector<double> ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume*
         //siArea += areaChips * nChips+deadArea;
 
 	nPixels=(reader.getChipTemplate(plainModule->chip_type)->rows * reader.getChipTemplate(plainModule->chip_type)->columns);
-        siArea += nPixels * nChips * (reader.getChipTemplate(plainModule->chip_type)->pitchPhi * reader.getChipTemplate(plainModule->chip_type)->pitchEta);
+        siArea += nPixels * nChips * (reader.getChipTemplate(plainModule->chip_type)->pitchPhi * reader.getChipTemplate(plainModule->chip_type)->pitchEta)-2*20;
 
         TGeoVolume * module_obj =  geom->MakeBox(module_name.c_str(),medModule,0.5*module_thickness,0.5*module_width,0.5*module_length);
         module_obj->SetLineColor(80);
@@ -289,7 +290,8 @@ vector<double> ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume*
 
       float rotation_degree=stave_ang+ sector_phi*ist*degree;
       rotstave->SetAngles(rotation_degree, 0, 0); // all angles in degrees
-                
+      if (i == 1 || i == 3) rotstave->SetAngles(rotation_degree+180,0,0);
+          
       if (complexity ==2) assembly_layer->AddNode(assembly_stave,ist+1, new TGeoCombiTrans(xpos,ypos,layer_halfplainlength * 0.25,rotstave));
       else assembly_layer->AddNode(assembly_stave,ist+1, new TGeoCombiTrans(xpos,ypos,0,rotstave));
       stave->Print();
