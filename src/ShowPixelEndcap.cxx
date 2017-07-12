@@ -274,7 +274,7 @@ vector<double> ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume*
 
    ofsSiArea.open(out);
    if(complexity!=0) ofsSiArea<<"Warning you are not viewing the full detector, switch to the full detector(style 0) to find siArea info for the entire layout"<<endl;
-   ofsSiArea<<"Si Area calulated by summing pixel areas. You are viewing: "<<infile<<" with style: "<<complexity<<endl<<"Endcaps"<<endl;
+   ofsSiArea<<"Si Area calulated by summing pixel areas (19.2mm x 20mm) per chip, and subtracting periphery region(2mm x 20mm) per chip. You are viewing: "<<infile<<" with style: "<<complexity<<endl<<"Endcaps"<<endl;
 
    ofsSiArea<<"layer:    Number of 1x1 Modules:"<<endl;
    for(int i = 0; i<nonexoneModule.size();i++){
