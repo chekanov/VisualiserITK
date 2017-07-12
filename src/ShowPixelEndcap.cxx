@@ -226,7 +226,7 @@ vector<double> ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume*
 				areaChips = reader.getChipTemplate(moduleTmp->chip_type)->length * reader.getChipTemplate(moduleTmp->chip_type)->width;
         			//siArea += (areaChips * nChips)+deadArea;
         			nPixels=(reader.getChipTemplate(moduleTmp->chip_type)->rows * reader.getChipTemplate(moduleTmp->chip_type)->columns);
-				siArea += nPixels* nChips * (reader.getChipTemplate(moduleTmp->chip_type)->pitchPhi * reader.getChipTemplate(moduleTmp->chip_type)->pitchEta);
+				siArea += nPixels* nChips * (reader.getChipTemplate(moduleTmp->chip_type)->pitchPhi * reader.getChipTemplate(moduleTmp->chip_type)->pitchEta)-2*20;
 				}//end loop over Modules
 				
 			}//end if complexity!=2 (ie. no modules)
@@ -274,7 +274,7 @@ vector<double> ShowPixelEndcap::process(InDet::XMLReaderSvc& reader, TGeoVolume*
 
    ofsSiArea.open(out);
    if(complexity!=0) ofsSiArea<<"Warning you are not viewing the full detector, switch to the full detector(style 0) to find siArea info for the entire layout"<<endl;
-   ofsSiArea<<"Si Area calulated by summing pixel areas. You are viewing: "<<infile<<" with style: "<<complexity<<endl<<"Endcaps"<<endl;
+   ofsSiArea<<"Si Area calulated by summing pixel areas and subtracting periphery region. You are viewing: "<<infile<<" with style: "<<complexity<<endl<<"Endcaps"<<endl;
 
    ofsSiArea<<"layer:    Number of 1x1 Modules:"<<endl;
    for(int i = 0; i<nonexoneModule.size();i++){
