@@ -116,7 +116,7 @@ vector<double> ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume*
       string stavename="Stave ("+stave_type+")"; // std::to_string(ist+1);
       TGeoVolume *assembly_stave = new TGeoVolumeAssembly(stavename.c_str());
 	
-      string barrelringname="Barrel Rings";
+      string barrelringname="Barrel Incline Modules";
       TGeoVolume *assembly_barrelring = new TGeoVolumeAssembly(barrelringname.c_str());
 
       stavename="Support ("+stave_type+")"; // +std::to_string(istave+1);
@@ -144,10 +144,10 @@ vector<double> ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume*
         string rmodule_name= ringModule->name;
         string rmodule_chip =ringModule->chip_type;
         double rmodule_angle = stave->alp_angle;
-        double rmodule_rshift = stave->alp_rshift;
-        cout << " ->Ring Module name=" << rmodule_name << " Chip=" << rmodule_chip << " length=" << rmodule_length << " mm  width=" << rmodule_width << " mm" << endl;
+        
+	cout << " ->Ring Module name=" << rmodule_name << " Chip=" << rmodule_chip << " length=" << rmodule_length << " mm  width=" << rmodule_width << " mm" << endl;
      
-     //add Barrel ring modules
+     //add Barrel incline  modules
      for(int irmod=0;irmod<rmodule_pos.size();irmod++){
 	double nChips = 0;
 	double areaChips = 0;
@@ -182,7 +182,7 @@ vector<double> ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume*
                  deadArea = 15.76;//doesnt matter if double length or width
             }
             if(nChips == 4){
-                 twoxtwoModule++;
+             twoxtwoModule++;
                  deadArea = 31.52;
             }
           }
@@ -209,16 +209,18 @@ vector<double> ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume*
 	assembly_barrelring->AddNode(rmodule_obj,irmod+1,new TGeoCombiTrans(0,0,-rmodule_pos[irmod],ringRotFlipped));
 	}
 
-	float  ringxpos=(layer_radius-stave_thickness+rmodule_rshift)*TMath::Cos(sector_phi*ist);
-        float ringypos=(layer_radius-stave_thickness+rmodule_rshift)*TMath::Sin(sector_phi*ist);
-
-	TGeoRotation *rotBarrelRings=new TGeoRotation;
-        rotBarrelRings->SetAngles(sector_phi*ist*degree,0,0);
-	
-	ringLayer_Assembly->AddNode(assembly_barrelring,ist+1, new TGeoCombiTrans(ringxpos,ringypos,0,rotBarrelRings));
 	}
      }
+     double rmodule_rshift = stave->alp_rshift;
+     float  ringxpos=(layer_radius-stave_thickness+rmodule_rshift)*TMath::Cos(sector_phi*ist);
+     float ringypos=(layer_radius-stave_thickness+rmodule_rshift)*TMath::Sin(sector_phi*ist);
 
+     TGeoRotation *rotBarrelRings=new TGeoRotation;
+     rotBarrelRings->SetAngles(sector_phi*ist*degree,0,0);
+	
+     ringLayer_Assembly->AddNode(assembly_barrelring,ist+1, new TGeoCombiTrans(ringxpos,ringypos,0,rotBarrelRings));
+
+	
      // show one pixel module
       InDet::ModuleTmp* plainModule = reader.getModuleTemplate(stave->b_type);
       double module_length = plainModule->length;
@@ -309,7 +311,8 @@ vector<double> ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume*
 	//1.5offset is a placeholder till xml files can be deterimned
 	pixel_barrel->AddNode(supportRing_obj,2,new TGeoTranslation(0,0,-layer_halfplainlength-10));	
 	*/
-   
+
+ 
      cout << "Layer Nr " << layer->index << " HalfPlainLength=" << layer_halfplainlength << endl;
 //      Rmin, Rmax, and a half-length dZ=1cm :
       string fullname="PixelBarrelLayer"; // string(layer->name)+std::to_string(i);
