@@ -836,35 +836,40 @@ void InDet::XMLReaderSvc::parseMaterialXML(DOMNode* node)
 
 }
 
-
+//this needs to be looked at ... possible minor bugs (af) ---------------------------------------------------------------------
 void InDet::XMLReaderSvc::computeModuleSize(InDet::ModuleTmp *module)
 {
 
   if(module == 0) return;
   if(module->chip_type.size()==0) return;
-
-  ChipTmp* chip = getChipTemplate(module->chip_type);
+  //original
+ /* ChipTmp* chip = getChipTemplate(module->chip_type);
   module->length = module->lengthChips*chip->length+2*chip->edgel;
   if(module->widthMinChips==0) module->widthMinChips = module->widthMaxChips;
   module->widthmin  = module->widthMinChips*chip->width+chip->edgew;
-  module->widthmax  = module->widthMaxChips*chip->width+chip->edgew;
+  module->widthmax  = module->widthMaxChips*chip->width+chip->edgew; //why only one edge? (af)
 
   if(chip->name.find("RD53") != std::string::npos) {
-    module->length = module->lengthChips*chip->length+(module->lengthChips-1)*2.*chip->edgel;
+    module->length = module->lengthChips*chip->length+(module->lengthChips-1)*2.*chip->edgel; //why does this have "...lengthChips-1) ??? (af)
     module->widthmax = module->widthMaxChips*chip->width+(module->widthMaxChips-1)*2.*chip->edgew;
     module->widthmin = module->widthmax;
   }
   else {
     if(module->chip_type=="SingleChip"){
-      module->widthmin += chip->edgen;
+      module->widthmin += chip->edgen;    //why only add the edge once? (af)
       module->widthmax += chip->edgen;
     }else{
       module->widthmin += chip->edgew;
       module->widthmax += chip->edgew;
     }
-  }
-}
+  }*/
 
+  ChipTmp* chip = getChipTemplate(module->chip_type);
+  module->length = module->lengthChips*(chip->length+2*chip->edgel);
+  if(module->widthMinChips==0) module->widthMinChips = module->widthMaxChips;
+  module->widthmin  = module->widthMinChips*(chip->width+2*chip->edgew);
+  module->widthmax  = module->widthMaxChips*(chip->width+2*chip->edgew);   
+}
 
 InDet::ComponentTmp* InDet::XMLReaderSvc::getComponentTemplate(const std::string s) const
 {
