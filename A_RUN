@@ -26,7 +26,7 @@ function run_me() {
                  echo "$txt_style" >>  $description_file
                  echo " " >>  $description_file 
                  echo "used xml files from:" >> $description_file 
-                 echo "https://svnweb.cern.ch/trac/atlasoff/browser//InnerDetector/InDetTrackingGeometryXML/trunk/share/" >> $description_file 
+                 echo "https://svnweb.cern.ch/trac/atlasoff/browser/InnerDetector/InDetDetDescr/InDetTrackingGeometryXML/trunk/share?order=name" >> $description_file 
                  echo "https://svnweb.cern.ch/trac/atlasoff/browser/InnerDetector/InDetDetDescr/PixelLayouts/BarrelInclinedRef/trunk/data/" >> $description_file 
                  echo ""  >>  $description_file 
                  echo "The 3D model is constructed from the following files in $geom:" >> $description_file 

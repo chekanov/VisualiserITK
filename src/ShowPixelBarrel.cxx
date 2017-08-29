@@ -48,9 +48,9 @@ vector<double> ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume*
    string PixelBarrelName = "PixelBarrel";
    TGeoVolume *PixelBarrel = new TGeoVolumeAssembly(PixelBarrelName.c_str());
 
-   string innerPixelBarrelRingsName = "InnerPixelBarrelRings";
+   string innerPixelBarrelRingsName = "InnerPixelBarrelInclined";
    TGeoVolume *innerPixelBarrelRings = new TGeoVolumeAssembly(innerPixelBarrelRingsName.c_str());
-   string PixelBarrelRingsName = "PixelBarrelRings";
+   string PixelBarrelRingsName = "PixelBarrelInclined";
    TGeoVolume *PixelBarrelRings = new TGeoVolumeAssembly(PixelBarrelRingsName.c_str());
 
 
@@ -70,7 +70,7 @@ vector<double> ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume*
       double twoxtwoModule =0;
       double onexoneModule = 0;      
 
-      string ringLayerName="RingLayerAssembly"; // +string(layer->name);
+      string ringLayerName="Incline Module layer"; // +string(layer->name);
       TGeoVolume *ringLayer_Assembly = new TGeoVolumeAssembly(ringLayerName.c_str());
 
 
@@ -195,8 +195,8 @@ vector<double> ShowPixelBarrel::process(InDet::XMLReaderSvc& reader, TGeoVolume*
 	//end siArea info section
 
 	TGeoVolume * rmodule_obj =  geom->MakeBox(rmodule_name.c_str(),medModule,rmodule_thickness,0.5*rmodule_width,0.5*rmodule_length);
-        rmodule_obj->SetLineColor(kTeal+3);
-        rmodule_obj->SetTransparency(65);
+        rmodule_obj->SetLineColor(kGreen+4);
+        rmodule_obj->SetTransparency(75);
 	
 	TGeoRotation *ringRot = new TGeoRotation;
 	ringRot->RotateY(-rmodule_angle*degree);

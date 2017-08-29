@@ -9,6 +9,13 @@ To run this visulaization tool, you need several external packages:
 
 ## Get ROOT
 Install ROOT 6.X and check that the variable $ROOTSYS is set. 
+For ATLAS/lxplus, please setup ROOT 6.08 to compile this package:
+
+```bash
+setupATLAS
+lsetup root
+localSetupROOT 6.08.02-x86_64-slc6-gcc49-opt
+```
 
 ## Get xercesc
 
@@ -45,6 +52,7 @@ Now get the package itself and compile it:
 wget https://github.com/chekanov/VisualiserITK/archive/master.zip
 unzip  master.zip
 cd VisualiserITK-master
+mkdir out # where the output files go
 make
 ```
   
